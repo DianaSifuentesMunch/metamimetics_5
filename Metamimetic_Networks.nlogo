@@ -65,11 +65,11 @@ ifelse am-i-the-best?   [set shape "face happy"]
 end
 
 to interact  ;; calculates the agents' payoffs for Prisioner's Dilema.
-let total-cooperators count (turtles-on link-neighbors) with [cooperate?]
+let total-cooperators count link-neighbors with [cooperate?]
 set inst-score 0
 ifelse cooperate?
     [set inst-score (total-cooperators * (1 - Strength-of-Dilemma) / count link-neighbors)]
-    [set inst-score ((total-cooperators + (count (turtles-on link-neighbors) - total-cooperators) * Strength-of-Dilemma ) / count link-neighbors)]  
+    [set inst-score ((total-cooperators + (count link-neighbors - total-cooperators) * Strength-of-Dilemma ) / count link-neighbors)]  
 set last-score score
 set score inst-score
 end
@@ -283,6 +283,58 @@ to-report max-frequency
 let l item 0 majority-rules
 report count (turtle-set link-neighbors self) with [rule = l] / (count link-neighbors + 1)
 end
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Layout  ;;;;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Layout code citation
+;Wilensky, U. (2005). NetLogo Preferential Attachment model. http://ccl.northwestern.edu/netlogo/models/PreferentialAttachment. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+;Wilensky, U. (1999). NetLogo. http://ccl.northwestern.edu/netlogo/. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+
+;; resize-nodes, change back and forth from size based on degree to a size of 1
+to resize-nodes
+  ifelse all? turtles [size <= 1]
+  [
+    ;; a node is a circle with diameter determined by
+    ;; the SIZE variable; using SQRT makes the circle's
+    ;; area proportional to its degree
+    ask turtles [ set size sqrt count link-neighbors ]
+  ]
+  [
+    ask turtles [ set size 1 ]
+  ]
+end
+
+to layout
+  ;; the number 3 here is arbitrary; more repetitions slows down the
+  ;; model, but too few gives poor layouts
+  repeat 10 [
+    ;; the more turtles we have to fit into the same amount of space,
+    ;; the smaller the inputs to layout-spring we'll need to use
+    let factor sqrt count turtles
+    ;; numbers here are arbitrarily chosen for pleasing appearance
+ ;   layout-spring turtles links (1 / factor) (7 / factor) (1 / factor)
+   layout-spring (turtles) links 0.4 6 1
+
+;    display  ;; for smooth animation
+  ]
+  ;; don't bump the edges of the world
+  let x-offset max [xcor] of turtles + min [xcor] of turtles
+  let y-offset max [ycor] of turtles + min [ycor] of turtles
+  ;; big jumps look funny, so only adjust a little each time
+  set x-offset limit-magnitude x-offset 0.1
+  set y-offset limit-magnitude y-offset 0.1
+  ask turtles [ setxy (xcor - x-offset / 2) (ycor - y-offset / 2) ]
+end
+
+to-report limit-magnitude [number limit]
+  if number > limit [ report limit ]
+  if number < (- limit) [ report (- limit) ]
+  report number
+end
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup Topologies  ;;;;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -908,7 +960,8 @@ end
   cooperation-rate
   satisfaction-rate
   satisfaction-rate2
-
+mincc
+mindeg
 ; life-distribution
 ;IN THE NETWORK CONTEXT
   clustering-coefficient               ;; average of clustering coefficients of all turtles
@@ -1646,11 +1699,14 @@ ifelse not Initial-Random-Types?
 
 set success? false
 
+if Num-Agents > 500
+[
 let rows  (ceiling ( sqrt Num-Agents ) ) 
 let columns (ceiling (Num-Agents / rows )) 
 set rows (rows / 2 ) 
 set columns (columns / 2 ) 
 resize-world ((-1) * rows) (rows - 1) ((-1) * columns) (columns - 1 )
+]
 set radius ( ( min (list world-width world-height) ) / 2 - 1)  
 show count patches 
 
@@ -1691,6 +1747,9 @@ set network-density count links * 2 / ( (Num-Agents - 1) * (Num-Agents))
 set shuffled2? false
 set n-links count links 
 set repetitions 0
+
+set mincc min [node-clustering-coefficient] of turtles
+set mindeg min [degree] of turtles
 
 set-outputs
 my-update-plots
@@ -1785,13 +1844,13 @@ if-else Colormap-View = "Strategies"
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
+25
 12
-11
-349
-369
+353
+347
 -1
 -1
-14.9
+13.83
 1
 10
 1
@@ -1801,7 +1860,7 @@ GRAPHICS-WINDOW
 0
 0
 1
--11
+-12
 10
 -11
 10
@@ -1971,7 +2030,7 @@ CHOOSER
 *-Topology
 *-Topology
 "Random" "Small-World" "Scale-Free" "Lattice"
-1
+3
 
 TEXTBOX
 376
@@ -2002,7 +2061,7 @@ SLIDER
 *-Rewiring-Probability
 0
 1
-0.585
+0
 .001
 1
 NIL
@@ -2069,10 +2128,10 @@ NIL
 HORIZONTAL
 
 CHOOSER
-11
-365
-126
-410
+30
+372
+145
+417
 Colormap-View
 Colormap-View
 "Strategies" "Behaviours"
@@ -2332,7 +2391,7 @@ Coefficient
 Count
 0.0
 0.05
-50.0
+0.0
 1.0
 true
 true
@@ -2460,6 +2519,40 @@ PENS
 "mini" 1.0 0 -10899396 true "" ""
 "conf" 1.0 0 -13345367 true "" ""
 "anti" 1.0 0 -16777216 true "" ""
+
+BUTTON
+270
+491
+343
+524
+Layout
+layout
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+268
+526
+347
+559
+resize-nodes
+resize-nodes
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -3604,7 +3697,7 @@ VIEW
 1
 1
 1
--11
+-12
 10
 -11
 10

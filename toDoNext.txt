@@ -1,0 +1,14 @@
+layout of turtles
+changing size of world (not always necessary) and turtles 
+finish adding sw-ness measure
+test small world for tested combinations k=8, 4 ; N=500 and p=0:.005:1
+do graphs for different rewiring prob and all p for each type specially in the limits and for maximal sw-ness
+add other measures of network to code
+research on average neighborhood and add code
+test results 
+load and test results for real world networks 
+add scale free efficient step
+ 
+ 
+ 
+
