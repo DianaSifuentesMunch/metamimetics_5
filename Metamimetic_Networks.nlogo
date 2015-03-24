@@ -247,7 +247,7 @@ to-report best-elements ;; report a list with the agents with the best performan
   let myset (turtle-set link-neighbors self)
   if rule = 1 [set myset myset with [score >= [score] of max-one-of myset [score] * 0.99]]
   
-  if rule = 2 [set myset myset with [score <= [score] of min-one-of myset [score] * 1.1]]
+  if rule = 2 [set myset myset with [score <= [score] of min-one-of myset [score] * 1.01]]
   
   if rule = 3 [
               let rules-list majority-rules
@@ -315,8 +315,8 @@ to layout
     ;; the smaller the inputs to layout-spring we'll need to use
     let factor sqrt count turtles
     ;; numbers here are arbitrarily chosen for pleasing appearance
- ;   layout-spring turtles links (1 / factor) (7 / factor) (1 / factor)
-   layout-spring (turtles) links 0.4 6 1
+    layout-spring turtles links (1 / factor) (7 / factor) (1 / factor)
+ ;  layout-spring (turtles) links 0.4 6 1
 
 ;    display  ;; for smooth animation
   ]
@@ -1923,7 +1923,7 @@ SLIDER
 *-strength-of-dilemma
 0
 0.5
-0.25
+0.5
 0.01
 1
 NIL
@@ -2061,7 +2061,7 @@ SLIDER
 *-Rewiring-Probability
 0
 1
-0
+0.159
 .001
 1
 NIL
@@ -2095,8 +2095,8 @@ Scale-Free Exponent
 TEXTBOX
 147
 494
-254
-550
+255
+570
 *Behaviour Colormap\n\nBlue   Cooperate\nOrange Defect
 9
 0.0
@@ -2419,7 +2419,7 @@ INPUTBOX
 774
 396
 FileName
-Shuffling
+latticeMinis.txt
 1
 0
 String
@@ -2521,10 +2521,10 @@ PENS
 "anti" 1.0 0 -16777216 true "" ""
 
 BUTTON
-270
-491
-343
-524
+278
+494
+351
+527
 Layout
 layout
 NIL
@@ -2538,10 +2538,10 @@ NIL
 1
 
 BUTTON
-268
-526
-347
-559
+277
+529
+356
+562
 resize-nodes
 resize-nodes
 NIL
@@ -3677,6 +3677,49 @@ export-network</final>
       <value value="&quot;Small-World&quot;"/>
     </enumeratedValueSet>
     <steppedValueSet variable="*-Rewiring-Probability" first="0" step="0.01" last="0.2"/>
+  </experiment>
+  <experiment name="LatticeMinis" repetitions="10" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>(all? turtles [shape = "face happy"] and ticks &gt; 1) or ticks  &gt; 200</exitCondition>
+    <metric>count turtles with [rule = 1] / count turtles</metric>
+    <metric>count turtles with [rule = 2] / count turtles</metric>
+    <metric>count turtles with [rule = 3] / count turtles</metric>
+    <metric>count turtles with [rule = 4] / count turtles</metric>
+    <enumeratedValueSet variable="*-Initial-Random-Types?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="*-Topology">
+      <value value="&quot;Lattice&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="*-p-Error-Copy-Rule">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Innovate?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="*-p-Error-Copy-Behavior">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Colormap-View">
+      <value value="&quot;Strategies&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Copy-Thetas?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="error_on_satisfaction">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="load-topology?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FileName">
+      <value value="&quot;latticeMinis.txt&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="*-strength-of-dilemma" first="0" step="0.01" last="0.5"/>
+    <enumeratedValueSet variable="*-inicoop">
+      <value value="50"/>
+    </enumeratedValueSet>
   </experiment>
 </experiments>
 @#$#@#$#@
