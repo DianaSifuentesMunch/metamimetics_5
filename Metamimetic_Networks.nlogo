@@ -1,22 +1,6 @@
 extensions [ nw ]
 
 
-;problem with minis idea: size of error bars is not similar to davids plot. Also, in proportion plots, minis look inversely related to conformists. 
-;on population with replacement: shouldn't all new turtles, independently of their age have a learning stage? 
-;why are turtles initialized with ages > 0 ?   
-;shouldn't all be born with age = 0 and then have growing stage until 15, grow older change and then possibly die? 
-;with replacement, add way to measure number and time of changes before death, to see consistency without replacement (anti settle first, conf settle last, etc) 
-
-
-; 2nd measure SW property will connect to python for better algorithm
-
-; measure sf for general ntwks
-; add step for faster creation of sf ntwks 
-; add other ntwk measures 
-; find bridges? 
-
-;all previous sources of noise be deleted?
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; To Go ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -29,6 +13,9 @@ to go
 ask turtles [set copy-error-rule *-p-Error-Copy-Rule]  
 ask turtles [set copy-error-behavior *-p-Error-Copy-Behavior]
 set Strength-of-Dilemma *-strength-of-dilemma
+set inicoop *-inicoop
+set replacement? *-replacement?
+
 
 
 ask turtles [interact]
@@ -166,7 +153,7 @@ ifelse random-float 1.0 > copy-error-rule ; some agents do the right thing
        
        set n-changes (n-changes + 1)
        set rule? false
-       set time-rule ticks
+       set time-rule age
 
              
 end
@@ -184,7 +171,7 @@ ifelse random-float 1 > copy-error-behavior ;only some agents do the right thing
       ifelse random-float 1.0 < .5  [set cooperate? true] [set cooperate? false] ;choose random behaviour
       ]
 set behavior? false
-set time-behavior ticks
+set time-behavior age
 end 
 
 
@@ -375,11 +362,29 @@ to replacement
      let ex2 item index2 life-distribution
      
      let prob-death 1 - (ex1 / (ex2 + 1))
-     ifelse  random-float 1  < prob-death [replace][set age age + 1]
+     
+     
+     ifelse  random-float 1  < prob-death 
+       [
+       set-info-death
+       replace
+       set shape "target" 
+       ]
+       [set age age + 1]
   ]
 end   
 
-
+to set-info-death
+if ticks > 100
+[
+set n-changes-list lput n-changes n-changes-list
+set time-rule-list lput time-rule time-rule-list
+set rule-at-death-list lput rule rule-at-death-list
+set time-behavior-list lput time-behavior time-behavior-list
+set age-at-death-list lput age age-at-death-list
+set nodes-list lput ([who] of self ) nodes-list
+]
+end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Layout  ;;;;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1245,11 +1250,18 @@ Transcription-error
 Copy-Error-Random? 
 PER
 PEB
-measure-small-world?
+
 replacement?
+
+
+n-changes-list 
+time-rule-list 
+rule-at-death-list 
+time-behavior-list 
+age-at-death-list
+nodes-list
+
 ;OUTPUTS
-
-
   maxi-before-shuffle
   mini-before-shuffle
   conf-before-shuffle
@@ -1384,13 +1396,8 @@ max-close-4
  sd-close-3 
  sd-close-4  
 
- last-rule-1 
- last-rule-2
- last-rule-3
- last-rule-4
   
 file.name
-
 
 
  mean-degree   
@@ -1453,6 +1460,7 @@ page-rank
 closeness-centrality
 longest-path
 mean-path
+
 ;time since last behavior change
 time-rule
 time-behavior
@@ -1700,10 +1708,6 @@ set conf-before-shuffle count turtles with [rule = 3]
 set anti-before-shuffle count turtles with [rule = 4]   
 end
 
-to measure-small-world
-if measure-small-world? []
-
-end
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1890,7 +1894,12 @@ set replacement? *-replacement?
 set Transcription-error 1
 set infinity Num-Agents * 100
 set average-path-length infinity
-
+set n-changes-list  []
+set time-rule-list  []
+set rule-at-death-list  []
+set age-at-death-list []
+set time-behavior-list  []
+set nodes-list []
 ;only setup if RN
 if Topology = "Random" [set Connection-Probability *-Connection-Probability]
 
@@ -1937,7 +1946,7 @@ set columns (columns / 2 )
 resize-world ((-1) * rows) (rows - 1) ((-1) * columns) (columns - 1 )
 ]
 set radius ( ( min (list world-width world-height) ) / 2 - 1)  
-show count patches 
+;show count patches 
 
 
 
@@ -2159,7 +2168,7 @@ SLIDER
 *-strength-of-dilemma
 0
 0.5
-0.38
+0.25
 0.01
 1
 NIL
@@ -2243,7 +2252,7 @@ INPUTBOX
 560
 397
 *-Num-Agents
-50
+200
 1
 0
 Number
@@ -2266,7 +2275,7 @@ CHOOSER
 *-Topology
 *-Topology
 "Random" "Small-World" "Scale-Free" "Lattice"
-3
+2
 
 TEXTBOX
 376
@@ -2297,7 +2306,7 @@ SLIDER
 *-Rewiring-Probability
 0
 1
-0.393
+1
 .001
 1
 NIL
@@ -2312,7 +2321,7 @@ SLIDER
 *-Scale-Free-Exponent
 1.5
 3.1
-2.29
+1.83
 .01
 1
 NIL
@@ -2357,7 +2366,7 @@ SLIDER
 *-Initial-Neighbours
 2
 *-Num-Agents - 1
-2
+8
 2
 1
 NIL
@@ -2800,6 +2809,17 @@ SWITCH
 0
 1
 -1000
+
+MONITOR
+675
+134
+761
+179
+New Turtles
+count turtles with [shape = \"target\"] * 100 / count turtles
+2
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

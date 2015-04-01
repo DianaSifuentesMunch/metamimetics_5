@@ -1,8 +1,27 @@
+
+Problem w Minis distribution:
+size of error bars is not similar to davids plot, mine look bigger. 
+Also, in proportion plots, minis look inversely related to conformists.and this doesn’t seem to happen with maxis, why?
+tightness of conditions "strictly be in majority (minority)" or "strictly have greater (smaller) payoffs than"  
+
+Replacement:
+agents die on average at age 63..is this ok? shouldn't it be a little larger?
+with replacement, New turtles are initialised with inicoop value probability. You can see how new generations initialisation can change overall cooperation, but not satisfaction or proportions greatly. Interesting idea on effects of new generations setup. 
+Also can test init on certain rules: "all are born x type" or "all are born what the majority of neighbours establish" etc
+Add step to measure nodes types allocation, to say “this node had mainly X type across generations”
+
+2nd measure SW property will connect to python for better algorithm
+measure sf for general ntwks (python)
+add step for faster creation of sf ntwks 
+add other ntwk measures 
+
+all previous sources of noise be deleted?
+
 add connection to python (create script) for other measures and toolbox
 add other measures of network to code or python library 
-add measures on average neighborhood 
+add measures on average neighbourhood 
 add scale free efficient step
-elminate previous sources of noise.
+eliminate previous sources of noise.
 
 answer questions about replacement. 
 finally fix problem with distributions on lattice? 
