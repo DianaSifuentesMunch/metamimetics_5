@@ -1,13 +1,23 @@
 extensions [ nw ]
-breed [Purples Purple]
 
-; paper measure SW property 
+
+;problem with minis idea: two different attractors? very few times grid has majority of payoffs based and not majority of conformists 
+;in the averages, this may take conf down and payoffs types up in the count
+
+;on population with replacement: shouldn't all new turtles, independently of their age have a learning stage? 
+;why are turtles initialized with ages > 0 ?   
+;shouldn't all be born with age = 0 and then have growing stage until 15, grow older change and then possibly die? 
+;with replacement, add way to measure number and time of changes before death, to see consistency without replacement (anti settle first, conf settle last, etc) 
+
+
+; 2nd measure SW property will connect to python for better algorithm
+
 ; measure sf for general ntwks
 ; add step for faster creation of sf ntwks 
 ; add other ntwk measures 
 ; find bridges? 
 
-
+;all previous sources of noise be deleted?
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -40,7 +50,7 @@ set-outputs
 ;uncomment to change dynamically on widget
 my-update-plots
 reset-change
-
+if replacement? [replacement]
 ask turtles [set age age + 1]
 
 tick
@@ -169,7 +179,7 @@ to select-behavior
 ifelse random-float 1 > copy-error-behavior ;only some agents do the right thing 
        [ 
        if (rule = 1) or (rule = 2) [set cooperate? [cooperate?] of one-of best-elements ]
-       if rule = 3                 [set cooperate? majority-behavior]         
+       if  rule = 3                 [set cooperate? majority-behavior]         
        if rule = 4                 [set cooperate? not majority-behavior]
        ]
       [
@@ -286,6 +296,93 @@ end
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Life Distributions  ;;;;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to init-age-USA2010 ;;Population fraction for ages according data colected
+                                 ;By Lindsay M. Howden and Julie A. Meyer in
+                                 ;Age and Sex Composition: 2010 Census briefs
+                                 ;Reported fractions have an interval of 5 years starting from 0 until 100 years
+  let census-dist (list 0.0654 0.0659 0.0670 0.0714 0.0699 0.0683 0.0647 0.0654 0.0677 0.0735 0.0722 0.0637 0.0545 0.0403 0.0301 0.0237 0.0186 0.0117 0.0047 0.0012 0.0002)
+  ask turtles [
+    let temp-init random 21
+    while [random-float 1 > item temp-init census-dist][set temp-init random 21]
+    set age (temp-init * 5) + random 5
+    ]
+end
+
+to set-life-distribution-USA2010 ;;Life expectation for ages according data colected by the Centers for Disease Control
+                                 ;and Prevention’s National Center for Health Statistics (NCHS) USA 2010
+                                 ;Murphy, Xu, and Kochanek 'Deaths: preliminary data 2010' National Vital Stat. Reports 60-4
+                                 ;Reported ages have an interval of 5 years starting from 0 until 100 years
+
+  set life-distribution (list 78.7 74.3 69.3 64.4 59.5 54.8 50.0 45.3 40.6 36.0 31.5 27.2 23.1 19.2 15.5 12.2 9.2 6.6 4.7 3.3 2.4) 
+end
+
+to replace  
+;    ifelse random-float 1.0 < 0.5 [set cooperate? true][set cooperate? false]        
+    set age 0
+    set rule? false
+    set behavior? false
+;   set move? false
+    set rule (random 4) + 1 
+    ;    move-to one-of (patch-set patches with [not any? turtles-here] patch-here)
+    set shape "face sad"
+    set size 1
+    set satisfaction2 1
+    ifelse random-float 1.0 < (inicoop / 100)
+        [set cooperate? true]
+        [set cooperate? false]
+    establish-color
+    set score 0.0
+    set rule? false
+    set behavior? false
+     ;set move? false
+
+
+    set copy-error-rule     PER  
+    set copy-error-behavior PEB
+       
+     
+;ifelse Asynchronous-Updating?
+;     [
+;     ifelse random-init-u?
+;       [
+;       set theta_1 random-float 1.0
+;       set theta_2 random-float 1.0
+;       ]
+;       [
+;       set theta_1 Initial-prob-update-behavior
+;       set theta_2 Initial-prob-update-rule
+;       ]
+;     ]
+;     [
+     set theta_1 1
+     set theta_2 1
+;     ]
+
+set time-rule 0
+set n-changes 0
+set shuffled? false
+end
+
+to replacement
+  ask turtles [    
+     let index1 floor age / 5
+     let index2 floor (age + 1) / 5
+     if index1 > 20 [set index1 20]
+     if index2 > 20 [set index2 20]
+     
+     let ex1 item index1 life-distribution
+     let ex2 item index2 life-distribution
+     
+     let prob-death 1 - (ex1 / (ex2 + 1))
+     ifelse  random-float 1  < prob-death [replace][set age age + 1]
+  ]
+end   
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Layout  ;;;;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -306,6 +403,7 @@ to resize-nodes
     ask turtles [ set size 1 ]
   ]
 end
+
 
 to layout
   ;; the number 3 here is arbitrary; more repetitions slows down the
@@ -418,53 +516,22 @@ while [not success?]
 end
 
 
-to Create-Random-for-Small-World 
+to Create-Measures-for-Small-World 
 
-ask turtles [die]
-let link-count 0
+;;;for equivalent random network
 set SWtest false
 set gammaSW infinity * (-1)
 set lambdaSW infinity * (-1)
 set Sdelta infinity * (-1)
-
-
-
-let rows  (ceiling ( sqrt Num-Agents ) ) 
-let columns (ceiling (Num-Agents / rows )) 
-set rows (rows / 2 ) 
-set columns (columns / 2 ) 
-resize-world ((-1) * rows) (rows - 1) ((-1) * columns) (columns - 1 )
-
-
-create-Purples Num-Agents
-layout-circle turtles ( radius ) 
-
 let mean-path-length false
-set success? false
-let connected? false
-while[not connected?]
-[
-  ask links [die]
-  repeat n-links
-  [
-    ask one-of turtles [
-        ask one-of other turtles with [not link-neighbor? myself]
-        [create-link-with myself [set color violet]]
-                       ]
+;for equivalent random network with same degree distribution
+create-equivalent-random-network-with-same-degree 
+nw:set-context turtles links
 
-  ]
-
-  set Purple-links links with [color = violet]
-  nw:set-context Purples Purple-links
-  set connected? true
-  set mean-path-length nw:mean-path-length
-  if not is-number? mean-path-length [set connected? false]
-]
-print("finished") 
-
+set mean-path-length nw:mean-path-length
 set equivalent-path-length mean-path-length
-ask Purples [set node-clustering-coefficient nw:clustering-coefficient]
-set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of Purples
+ask turtles [set node-clustering-coefficient nw:clustering-coefficient]
+set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of turtles
 set equivalent-clustering-coefficient-2      global-clustering-coefficient
 
 set gammaSW (clustering-coefficient-2 / equivalent-clustering-coefficient-2)
@@ -472,19 +539,181 @@ set lambdaSW (average-path-length / equivalent-path-length)
 set Sdelta (gammaSW / lambdaSW) 
 if Sdelta > 1 [set SWtest true]
 
-ask turtles [die]
-Create-Lattice
-ask turtles [set color red]
-let Red-turtles turtles with [color = red ]
-nw:set-context Red-turtles links 
-set clustering-lattice global-clustering-coefficient
-
-
-set omega ( (equivalent-path-length / average-path-length) - (clustering-coefficient-2 / clustering-lattice) )
-
-
-
+;;;Create Equivalent Ring Lattice
+;ask turtles [set color red]
+;let Red-turtles turtles with [color = red ]
+;nw:set-context Red-turtles links 
+;set clustering-lattice global-clustering-coefficient
+;set omega ( (equivalent-path-length-same-degree / average-path-length) - (clustering-coefficient-2 / clustering-lattice) )
 end
+
+to create-equivalent-ring-lattice-with-same-degree
+print("Creating an Equivalent Ring Lattice with Same Degree")
+
+ask turtles [set free-stubs degree]
+layout-circle sort turtles (radius )
+let current-turtle-1 nobody 
+let total-neighbors 0 
+let total-left 0
+let total-right 0 
+let new-right nobody 
+let new-left nobody 
+let free-turtles turtles
+
+while [any? free-turtles]
+[
+set current-turtle-1 max-one-of turtles [free-stubs]
+show [who] of current-turtle-1
+set total-neighbors [degree] of current-turtle-1
+set total-left floor (total-neighbors / 2)
+set total-right ceiling (total-neighbors / 2)
+if total-left + total-right != total-neighbors [print ("wrong count")]
+
+if total-right > 0 [set new-right turtles-to-the-right total-right current-turtle-1]
+if total-left  > 0 [set new-left turtles-to-the-left total-left current-turtle-1 ]
+
+ask current-turtle-1 [
+                     if is-turtle-set? new-right
+                        [
+                        create-links-with new-right [set color green]
+                        set free-stubs (free-stubs - count new-right)
+                        ask new-right [set free-stubs (free-stubs - 1)]
+                        ]
+                     if is-turtle-set? new-left
+                        [
+                        create-links-with new-left [set color green]
+                        set free-stubs (free-stubs - count new-left)
+                        ask new-left [set free-stubs (free-stubs - 1)]
+                        ]
+                     ]
+set free-turtles turtles with [free-stubs > 0]
+]
+print(" finished") 
+ ask links with [color = gray] [die]
+end
+
+to-report turtles-to-the-right [k current-turtle]
+let n [who] of current-turtle
+let turtles-right nobody 
+let candidate-turtle nobody 
+let i 1 
+while [not is-turtle-set? turtles-right]
+[ 
+set candidate-turtle turtle ((n + i) mod Num-Agents )
+if [free-stubs] of candidate-turtle > 0 
+[if candidate-turtle != current-turtle [set turtles-right (turtle-set turtles-right candidate-turtle)]]
+
+set candidate-turtle nobody
+set i (i + 1)
+]
+while [count turtles-right < k ]
+[
+set candidate-turtle nobody
+while [not is-turtle? candidate-turtle]
+[ 
+set candidate-turtle turtle ((n + i) mod Num-Agents )
+if [free-stubs] of candidate-turtle > 0 
+[if candidate-turtle != current-turtle [set turtles-right (turtle-set turtles-right candidate-turtle)]]
+set i (i + 1)
+]
+] 
+report turtles-right
+end
+
+to-report turtles-to-the-left [k current-turtle]
+let n [who] of current-turtle
+let turtles-left nobody 
+let candidate-turtle nobody 
+let i 1 
+while [not is-turtle-set? turtles-left]
+[ 
+set candidate-turtle turtle ((n - i) mod Num-Agents )
+if [free-stubs] of candidate-turtle > 0 
+[if candidate-turtle != current-turtle [set turtles-left (turtle-set turtles-left candidate-turtle)]]
+set candidate-turtle nobody
+set i (i + 1)
+]
+while [count turtles-left < k ]
+[
+set candidate-turtle nobody
+while [not is-turtle? candidate-turtle]
+[ 
+set candidate-turtle turtle ((n - i) mod Num-Agents )
+if [free-stubs] of candidate-turtle > 0 
+[if candidate-turtle != current-turtle [set turtles-left (turtle-set turtles-left candidate-turtle)]]
+set i (i + 1)
+]
+] 
+report turtles-left
+end
+
+
+
+to create-equivalent-random-network-with-same-degree
+print("Creating an Equivalent Random Netowrk with Same Degree")
+ let current-turtle-1 nobody
+ let current-turtle-2 nobody
+ let candidate-turtle-1 nobody
+ let candidate-turtle-2 nobody
+ let swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
+ let rewire-count 0
+ let candidates-2 nobody  
+while [ rewire-count < ( n-links * 10 )  ]
+ [
+set current-turtle-1 nobody
+set current-turtle-2 nobody
+set candidate-turtle-1 nobody
+set candidate-turtle-2 nobody
+set swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
+ 
+ while [count swap-turtles < 4]
+ [
+ set current-turtle-1 one-of turtles
+ set candidate-turtle-1 one-of [link-neighbors] of current-turtle-1
+ set current-turtle-2 one-of turtles with [not member? self (turtle-set current-turtle-1 candidate-turtle-1 ([link-neighbors] of candidate-turtle-1))]
+ set candidates-2 turtles with [not member? self (turtle-set current-turtle-1 candidate-turtle-1 ([link-neighbors] of current-turtle-1 )) and member? self [link-neighbors] of current-turtle-2]
+ set candidate-turtle-2 one-of candidates-2
+ set swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
+ ]
+ 
+ ask link [who] of current-turtle-1 [who] of candidate-turtle-1 [die] 
+ ask link [who] of current-turtle-2 [who] of candidate-turtle-2 [die] 
+ ask current-turtle-1 [create-link-with candidate-turtle-2]
+ ask current-turtle-2 [create-link-with candidate-turtle-1]
+ set rewire-count (rewire-count + 1)
+
+]
+print("finished") 
+end
+
+;to create-equivalent-random-network
+;;Create an equivalent random network
+;create-Purples Num-Agents
+;layout-circle turtles ( radius ) 
+;set mean-path-length false
+;set success? false
+;set connected? false
+;while[not connected?]
+;[
+;  ask links [die]
+;  repeat n-links
+;  [
+;    ask one-of turtles [
+;        ask one-of other turtles with [not link-neighbor? myself]
+;        [create-link-with myself [set color violet]]
+;                       ]
+;  ]
+;  set Purple-links links with [color = violet]
+;  nw:set-context Purples Purple-links
+;  set connected? true
+;  set mean-path-length nw:mean-path-length
+;  if not is-number? mean-path-length [set connected? false]
+;]
+;set equivalent-path-length mean-path-length
+;ask Purples [set node-clustering-coefficient nw:clustering-coefficient]
+;set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of Purples
+;set equivalent-clustering-coefficient-2      global-clustering-coefficient
+;end
 
 
 
@@ -543,13 +772,10 @@ to wire-rewire-them
   ;; set up a variable to see if the network is connected
   set success? false
 
-  ;; if we end up with a disconnected network, we keep trying, because the APL distance
-  ;; isn't meaningful for a disconnected network.
+  ;; if we end up with a disconnected network, keep trying
   while [not success?] [
-    ;; kill the old lattice, reset neighbors, and create new lattice
-    
+    ;; kill the old lattice, reset neighbors, and create new lattice    
     wire-them
-    
     ask links [
       ;; whether to rewire it or not?
       if (random-float 1) < Rewiring-Probability
@@ -629,9 +855,9 @@ ask links [set color gray]
 ]
 end
 
-to assign-degrees-to-turtles
+to assign-degrees-to-turtles [degree-sequence]
 let i 0
-foreach sequence
+foreach degree-sequence
 [
 ask item i (sort turtles)
  [
@@ -665,7 +891,7 @@ end
 to configuration-model ;;star constrained graphicality configuration model more efficient, 
                        ;;produces greater variety of graphs. The probability of producing a certain graph can be calculated for ensemble values
 
-assign-degrees-to-turtles
+assign-degrees-to-turtles sequence
 clear-links
 
 let value -1 
@@ -960,9 +1186,12 @@ end
   cooperation-rate
   satisfaction-rate
   satisfaction-rate2
-mincc
-mindeg
-; life-distribution
+  mincc
+  mindeg
+
+  life-distribution
+
+
 ;IN THE NETWORK CONTEXT
   clustering-coefficient               ;; average of clustering coefficients of all turtles
   average-path-length                  ;; average path length of the network
@@ -971,6 +1200,7 @@ mindeg
   n-links
   clustering-coefficient-2
   clustering-lattice
+equivalent-path-length-same-degree
   SWtest
   gammaSW
   lambdaSW
@@ -979,13 +1209,13 @@ equivalent-path-length
 equivalent-clustering-coefficient
 equivalent-clustering-coefficient-2
 omega 
-
-Purple-links
+original-degrees
 Gray-links
 ;for connectivity
 success?
 ;for small world and random.
 infinity
+
 ;for scale-free
 graphical?
 sequence
@@ -1018,7 +1248,7 @@ Copy-Error-Random?
 PER
 PEB
 measure-small-world?
-
+replacement?
 ;OUTPUTS
 
 
@@ -1658,6 +1888,7 @@ set Num-Agents *-Num-Agents
 set Topology *-Topology
 set Strength-of-Dilemma *-strength-of-dilemma
 set inicoop *-inicoop
+set replacement? *-replacement?
 set Transcription-error 1
 set infinity Num-Agents * 100
 set average-path-length infinity
@@ -1724,6 +1955,12 @@ ifelse not load-topology? [setup-Topology]
 set Num-Agents count turtles
 
 setup-init-turtles
+
+if replacement? [
+                 init-age-USA2010
+                 set-life-distribution-USA2010
+                 ]
+
 set average-path-length nw:mean-path-length
 
 set diameter max [longest-path] of turtles  
@@ -1750,6 +1987,7 @@ set repetitions 0
 
 set mincc min [node-clustering-coefficient] of turtles
 set mindeg min [degree] of turtles
+set original-degrees [degree] of turtles
 
 set-outputs
 my-update-plots
@@ -1846,11 +2084,11 @@ end
 GRAPHICS-WINDOW
 25
 12
+359
 353
-347
 -1
 -1
-13.83
+14.1
 1
 10
 1
@@ -1923,7 +2161,7 @@ SLIDER
 *-strength-of-dilemma
 0
 0.5
-0.5
+0.38
 0.01
 1
 NIL
@@ -1980,7 +2218,7 @@ SLIDER
 *-inicoop
 0
 100
-50
+51
 1
 1
 NIL
@@ -1995,7 +2233,7 @@ SLIDER
 *-Connection-Probability
 0.0
 1
-0.065
+0.925
 .001
 1
 NIL
@@ -2007,7 +2245,7 @@ INPUTBOX
 560
 397
 *-Num-Agents
-500
+50
 1
 0
 Number
@@ -2061,7 +2299,7 @@ SLIDER
 *-Rewiring-Probability
 0
 1
-0.159
+0.393
 .001
 1
 NIL
@@ -2121,7 +2359,7 @@ SLIDER
 *-Initial-Neighbours
 2
 *-Num-Agents - 1
-8
+2
 2
 1
 NIL
@@ -2376,7 +2614,7 @@ MONITOR
 267
 481
 Density Links
-network-density
+count links * 2 / ( (count turtles - 1) * (count turtles))
 2
 1
 11
@@ -2419,7 +2657,7 @@ INPUTBOX
 774
 396
 FileName
-latticeMinis.txt
+latticeMinisCop.txt
 1
 0
 String
@@ -2553,6 +2791,17 @@ NIL
 NIL
 NIL
 1
+
+SWITCH
+485
+269
+636
+302
+*-replacement?
+*-replacement?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -3678,16 +3927,19 @@ export-network</final>
     </enumeratedValueSet>
     <steppedValueSet variable="*-Rewiring-Probability" first="0" step="0.01" last="0.2"/>
   </experiment>
-  <experiment name="LatticeMinis" repetitions="10" runMetricsEveryStep="false">
+  <experiment name="LatticeMinis" repetitions="20" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
-    <exitCondition>(all? turtles [shape = "face happy"] and ticks &gt; 1) or ticks  &gt; 200</exitCondition>
+    <exitCondition>(all? turtles [shape = "face happy"] and ticks &gt; 1) or ticks  &gt; 100</exitCondition>
     <metric>count turtles with [rule = 1] / count turtles</metric>
     <metric>count turtles with [rule = 2] / count turtles</metric>
     <metric>count turtles with [rule = 3] / count turtles</metric>
     <metric>count turtles with [rule = 4] / count turtles</metric>
     <enumeratedValueSet variable="*-Initial-Random-Types?">
       <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="*-Num-Agents">
+      <value value="500"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="*-Topology">
       <value value="&quot;Lattice&quot;"/>
@@ -3720,6 +3972,55 @@ export-network</final>
     <enumeratedValueSet variable="*-inicoop">
       <value value="50"/>
     </enumeratedValueSet>
+  </experiment>
+  <experiment name="LatticeMinisCoop" repetitions="10" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>(all? turtles [shape = "face happy"] and ticks &gt; 1) or ticks  &gt; 100</exitCondition>
+    <metric>count turtles with [rule = 1] / count turtles</metric>
+    <metric>count turtles with [rule = 2] / count turtles</metric>
+    <metric>count turtles with [rule = 3] / count turtles</metric>
+    <metric>count turtles with [rule = 4] / count turtles</metric>
+    <metric>count turtles with [cooperate? = TRUE] / count turtles</metric>
+    <metric>count turtles with [rule = 1 and cooperate? = TRUE] / count turtles with [rule = 1]</metric>
+    <metric>count turtles with [rule = 2 and cooperate? = TRUE] / count turtles with [rule = 2]</metric>
+    <metric>count turtles with [rule = 3 and cooperate? = TRUE] / count turtles with [rule = 3]</metric>
+    <metric>count turtles with [rule = 4 and cooperate? = TRUE] / count turtles with [rule = 4]</metric>
+    <enumeratedValueSet variable="*-Initial-Random-Types?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="*-Num-Agents">
+      <value value="500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="*-Topology">
+      <value value="&quot;Lattice&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="*-p-Error-Copy-Rule">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Innovate?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="*-p-Error-Copy-Behavior">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Colormap-View">
+      <value value="&quot;Strategies&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Copy-Thetas?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="error_on_satisfaction">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="load-topology?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FileName">
+      <value value="&quot;latticeMinisCop.txt&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="*-strength-of-dilemma" first="0" step="0.1" last="0.5"/>
+    <steppedValueSet variable="*-inicoop" first="0" step="15" last="100"/>
   </experiment>
 </experiments>
 @#$#@#$#@
