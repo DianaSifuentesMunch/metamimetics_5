@@ -1,9 +1,7 @@
 extensions [ nw ]
 
 
-;problem with minis idea: two different attractors? very few times grid has majority of payoffs based and not majority of conformists 
-;in the averages, this may take conf down and payoffs types up in the count
-
+;problem with minis idea: size of error bars is not similar to davids plot. Also, in proportion plots, minis look inversely related to conformists. 
 ;on population with replacement: shouldn't all new turtles, independently of their age have a learning stage? 
 ;why are turtles initialized with ages > 0 ?   
 ;shouldn't all be born with age = 0 and then have growing stage until 15, grow older change and then possibly die? 
