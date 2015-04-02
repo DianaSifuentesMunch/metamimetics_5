@@ -1,16 +1,18 @@
 extensions [ nw ]
 
+;Order of commands for outputs: 
+;checkout order when printing sw test (due to dissaperance of turtles) 
+;export-network
+;export-data
+
+;take measures in noisy settings? 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; To Go ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-
 to go
 ;uncomment to change dynamically on widget
-;ask turtles [set copy-error-rule *-p-Error-Copy-Rule]  
-;ask turtles [set copy-error-behavior *-p-Error-Copy-Behavior]
 set Strength-of-Dilemma *-strength-of-dilemma
 set inicoop *-inicoop
 set replacement? *-replacement?
@@ -1486,7 +1488,6 @@ links-own[
 
 to set-outputs
 
-ask turtles [set neighbors-type [rule] of link-neighbors] 
 set cooperation-rate count turtles with [cooperate?] / Num-Agents
 set satisfaction-rate count turtles with [shape = "face happy"] / Num-Agents
 set satisfaction-rate2  mean [satisfaction2] of turtles
@@ -1503,7 +1504,24 @@ set maxi count turtles-maxi
 set mini count turtles-mini  
 set conf count turtles-conf  
 set anti count turtles-anti   
+end
 
+to set-final-outputs
+  
+set cooperation-rate count turtles with [cooperate?] / Num-Agents
+set satisfaction-rate count turtles with [shape = "face happy"] / Num-Agents
+set satisfaction-rate2  mean [satisfaction2] of turtles
+
+let turtles-maxi turtles with [rule = 1]
+let turtles-mini turtles with [rule = 2]
+let turtles-conf turtles with [rule = 3]
+let turtles-anti turtles with [rule = 4]
+
+
+set maxi count turtles-maxi  
+set mini count turtles-mini  
+set conf count turtles-conf  
+set anti count turtles-anti   
 
 
 if count turtles-maxi > 0
@@ -1776,21 +1794,20 @@ end
 to export-data
 ;;set the directory where the file will be stored
 create-new-file ""
-set-outputs
+set-final-outputs
 print-data-in-file
+
 count-before-shuffle
-set repetitions 1 
-;repeat 2
-;[
 shuffle-turtles
-set-outputs
-;; create the column headings once
+set-final-outputs
 print-data-in-file
-;set repetitions (repetitions + 1)
-;]
 end
 
 to export-network
+set-final-outputs
+ask turtles [set neighbors-who  [who] of  turtle-set (sort-on [who] link-neighbors) ]
+ask turtles [set neighbors-type [rule] of turtle-set (sort-on [who] link-neighbors) ]
+
 ;;set the directory where the file will be stored
 create-new-file "Network"
 
@@ -1805,11 +1822,11 @@ ask ? [
                         longest-path spacer mean-path spacer time-rule spacer time-behavior spacer
                         n-changes spacer strength-of-dilemma spacer inicoop spacer Rewiring-Probability spacer 
                         Num-Agents spacer Initial-Neighbours spacer FileName spacer 
-                        clustering-coefficient spacer average-path-length spacer degree spacer count links spacer neighbors-who spacer neighbors-type)
+                        clustering-coefficient spacer average-path-length spacer degree spacer n-links spacer 
+                        neighbors-type spacer neighbors-who)
       file-close
       ]
 ]
-
 end
 
 
@@ -1990,9 +2007,10 @@ set mincc min [node-clustering-coefficient] of turtles
 set mindeg min [degree] of turtles
 set original-degrees [degree] of turtles
 
+ask turtles [establish-color]
 set-outputs
 my-update-plots
-ask turtles [establish-color]
+
 reset-ticks
 
 end
@@ -2041,7 +2059,6 @@ set distance-from-other-turtles map [nw:distance-to ?] sort turtles
 set longest-path max distance-from-other-turtles
 
 set mean-path mean distance-from-other-turtles
-set neighbors-who [who] of link-neighbors
 
      ;set move? false
 ;      set copy-error-rule     PER  
@@ -2268,7 +2285,7 @@ CHOOSER
 *-Topology
 *-Topology
 "Random" "Small-World" "Scale-Free" "Lattice"
-2
+0
 
 TEXTBOX
 388
@@ -2299,7 +2316,7 @@ SLIDER
 *-Rewiring-Probability
 0
 1
-0.049
+1
 .001
 1
 NIL
@@ -2377,9 +2394,9 @@ Colormap-View
 
 MONITOR
 683
-167
+153
 741
-212
+198
 Maxi %
 count turtles with [ rule = 1 ] * 100 / count turtles
 2
@@ -2388,9 +2405,9 @@ count turtles with [ rule = 1 ] * 100 / count turtles
 
 MONITOR
 744
-168
+154
 802
-213
+199
 Mini %
 count turtles with [rule = 2 ] * 100 / count turtles
 2
@@ -2399,9 +2416,9 @@ count turtles with [rule = 2 ] * 100 / count turtles
 
 MONITOR
 683
-216
+202
 743
-261
+247
 Conf %
 count turtles with [rule = 3 ]  * 100 / count turtles
 2
@@ -2410,9 +2427,9 @@ count turtles with [rule = 3 ]  * 100 / count turtles
 
 MONITOR
 744
-216
-806
-261
+202
+803
+248
 Anti %
 count turtles with [rule = 4 ] * 100 / count turtles
 2
@@ -2454,18 +2471,18 @@ TEXTBOX
 TEXTBOX
 385
 128
-577
-146
+594
+152
 *Add noise by replacing the population?
 9
 15.0
 1
 
 SWITCH
-618
-323
-793
-356
+620
+325
+795
+358
 *-Initial-Random-Types?
 *-Initial-Random-Types?
 0
@@ -2473,20 +2490,20 @@ SWITCH
 -1000
 
 TEXTBOX
-620
+622
 310
-770
-328
+792
+329
 *Random Assignation of Types?
 9
 0.0
 1
 
 INPUTBOX
-617
-372
-702
-432
+619
+374
+704
+434
 *-Initial-Maxi-%
 0
 1
@@ -2494,10 +2511,10 @@ INPUTBOX
 Number
 
 INPUTBOX
-704
-372
-787
-432
+706
+374
+789
+434
 *-Initial-Mini-%
 0
 1
@@ -2505,10 +2522,10 @@ INPUTBOX
 Number
 
 INPUTBOX
-618
-432
-701
-492
+620
+434
+703
+494
 *-Initial-Conf-%
 50
 1
@@ -2516,10 +2533,10 @@ INPUTBOX
 Number
 
 MONITOR
-707
-434
-791
-479
+709
+436
+793
+481
 Initial-Anti-%
 100 - *-Initial-Maxi-% - *-Initial-Mini-% - *-Initial-Conf-%
 0
@@ -2527,20 +2544,20 @@ Initial-Anti-%
 11
 
 TEXTBOX
-618
-358
-805
-378
+620
+360
+807
+380
 Otherwise Input % Initial Types
 9
 0.0
 1
 
 TEXTBOX
-637
-204
-737
-227
+723
+135
+823
+158
 Types %
 9
 0.0
@@ -2627,7 +2644,7 @@ INPUTBOX
 586
 562
 FileName
-/Users/Diana/Documents/StageData/csv/matrixBlogs.txt
+gs.txt
 1
 0
 String
@@ -2730,21 +2747,21 @@ NIL
 1
 
 SWITCH
-405
-144
-556
-177
+407
+158
+558
+191
 *-replacement?
 *-replacement?
-0
+1
 1
 -1000
 
 MONITOR
-719
-121
-805
-166
+622
+170
+680
+216
 New Turtles
 count turtles with [shape = \"target\"] * 100 / count turtles
 2
@@ -2752,10 +2769,10 @@ count turtles with [shape = \"target\"] * 100 / count turtles
 11
 
 TEXTBOX
-637
-291
-787
-309
+639
+293
+789
+311
 *Choose types distribution
 9
 15.0
