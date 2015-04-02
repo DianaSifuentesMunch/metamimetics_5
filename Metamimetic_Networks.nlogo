@@ -1,7 +1,6 @@
 extensions [ nw ]
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; To Go ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10,8 +9,8 @@ extensions [ nw ]
 
 to go
 ;uncomment to change dynamically on widget
-ask turtles [set copy-error-rule *-p-Error-Copy-Rule]  
-ask turtles [set copy-error-behavior *-p-Error-Copy-Behavior]
+;ask turtles [set copy-error-rule *-p-Error-Copy-Rule]  
+;ask turtles [set copy-error-behavior *-p-Error-Copy-Behavior]
 set Strength-of-Dilemma *-strength-of-dilemma
 set inicoop *-inicoop
 set replacement? *-replacement?
@@ -83,23 +82,23 @@ to decision-stage
 ask turtles [
   
   let satisfaction  am-i-the-best? ;  
-  if error_on_satisfaction
-  [
-  if random-float 1 <= copy-error-rule ;
-     [set satisfaction not am-i-the-best?]
-  ]
+;  if error_on_satisfaction
+;  [
+;  if random-float 1 <= copy-error-rule ;
+;     [set satisfaction not am-i-the-best?]
+;  ]
 
   
 if not satisfaction
 [
-if random-float 1 <= theta_2 ;only some agents will be allowed to change rule
-      [
+;if random-float 1 <= theta_2 ;only some agents will be allowed to change rule
+;      [
       set rule? true 
       set behavior? true
-      ]
+;      ]
        
- if random-float 1 <= theta_1      
-      [set behavior? true]
+; if random-float 1 <= theta_1      
+;      [set behavior? true]
 ]
 
 if age < 15 
@@ -127,30 +126,31 @@ end
 
 ; choose strategy if your rule is not the best, if innovate? choose rule if you are unsatisfied
 to select-rule              
-   ifelse not is-my-rule-the-best?   
+ ;  ifelse not is-my-rule-the-best?   
+   if not is-my-rule-the-best?   
    [copy-strategy (one-of best-elements)]         
    
-   [if not am-i-the-best? and member? rule [rule] of best-elements and innovate? ;stuck agent will innovate with probability error-copy
-       [copy-strategy (one-of best-elements)]
-   ]
+;   [if not am-i-the-best? and member? rule [rule] of best-elements and innovate? ;stuck agent will innovate with probability error-copy
+;       [copy-strategy (one-of best-elements)]
+;   ]
 end
 
 
 
 to copy-strategy [temp-agent]
 ;;;RULE STEP
-ifelse random-float 1.0 > copy-error-rule ; some agents do the right thing
-       [
+;ifelse random-float 1.0 > copy-error-rule ; some agents do the right thing
+;       [
        set rule [rule] of temp-agent
-         set theta_1 [theta_1] of temp-agent       
-         set theta_2 [theta_2] of temp-agent 
-         if Copy-Thetas? [
-         set theta_1 add-noise "theta_1" Transcription-Error
-         set theta_2 add-noise "theta_2" Transcription-Error
-                         ]
-       ]     
-       [set rule random 4 + 1 ] ;do a random thing
-       
+;         set theta_1 [theta_1] of temp-agent       
+;         set theta_2 [theta_2] of temp-agent 
+;         if Copy-Thetas? [
+;         set theta_1 add-noise "theta_1" Transcription-Error
+;         set theta_2 add-noise "theta_2" Transcription-Error
+;                         ]
+;       ]     
+;       [set rule random 4 + 1 ] ;do a random thing
+;       
        set n-changes (n-changes + 1)
        set rule? false
        set time-rule age
@@ -161,15 +161,15 @@ end
 
 
 to select-behavior 
-ifelse random-float 1 > copy-error-behavior ;only some agents do the right thing 
-       [ 
+;ifelse random-float 1 > copy-error-behavior ;only some agents do the right thing 
+;       [ 
        if (rule = 1) or (rule = 2) [set cooperate? [cooperate?] of one-of best-elements ]
        if  rule = 3                 [set cooperate? majority-behavior]         
        if rule = 4                 [set cooperate? not majority-behavior]
-       ]
-      [
-      ifelse random-float 1.0 < .5  [set cooperate? true] [set cooperate? false] ;choose random behaviour
-      ]
+;       ]
+;      [
+;      ifelse random-float 1.0 < .5  [set cooperate? true] [set cooperate? false] ;choose random behaviour
+;      ]
 set behavior? false
 set time-behavior age
 end 
@@ -325,9 +325,9 @@ to replace
      ;set move? false
 
 
-    set copy-error-rule     PER  
-    set copy-error-behavior PEB
-       
+;    set copy-error-rule     PER  
+;    set copy-error-behavior PEB
+;       
      
 ;ifelse Asynchronous-Updating?
 ;     [
@@ -341,10 +341,10 @@ to replace
 ;       set theta_2 Initial-prob-update-rule
 ;       ]
 ;     ]
-;     [
-     set theta_1 1
-     set theta_2 1
-;     ]
+;;     [
+;     set theta_1 1
+;     set theta_2 1
+;;     ]
 
 set time-rule 0
 set n-changes 0
@@ -1262,6 +1262,7 @@ age-at-death-list
 nodes-list
 
 ;OUTPUTS
+
   maxi-before-shuffle
   mini-before-shuffle
   conf-before-shuffle
@@ -1440,8 +1441,8 @@ turtles-own [
   behavior?
  
  
-  theta_1
-  theta_2
+;  theta_1
+;  theta_2
 
 ;  weighting-history
 
@@ -1465,7 +1466,8 @@ mean-path
 time-rule
 time-behavior
 n-changes
-
+neighbors-who
+neighbors-type
 ;for outputs
 shuffled?
 ]
@@ -1483,6 +1485,8 @@ links-own[
 
 
 to set-outputs
+
+ask turtles [set neighbors-type [rule] of link-neighbors] 
 set cooperation-rate count turtles with [cooperate?] / Num-Agents
 set satisfaction-rate count turtles with [shape = "face happy"] / Num-Agents
 set satisfaction-rate2  mean [satisfaction2] of turtles
@@ -1801,7 +1805,7 @@ ask ? [
                         longest-path spacer mean-path spacer time-rule spacer time-behavior spacer
                         n-changes spacer strength-of-dilemma spacer inicoop spacer Rewiring-Probability spacer 
                         Num-Agents spacer Initial-Neighbours spacer FileName spacer 
-                        clustering-coefficient spacer average-path-length spacer degree spacer count links)
+                        clustering-coefficient spacer average-path-length spacer degree spacer count links spacer neighbors-who spacer neighbors-type)
       file-close
       ]
 ]
@@ -1891,7 +1895,7 @@ set Topology *-Topology
 set Strength-of-Dilemma *-strength-of-dilemma
 set inicoop *-inicoop
 set replacement? *-replacement?
-set Transcription-error 1
+
 set infinity Num-Agents * 100
 set average-path-length infinity
 set n-changes-list  []
@@ -1927,9 +1931,9 @@ ifelse not Initial-Random-Types?
       set Initial-Anti-% (100 - Initial-Conf-% - Initial-Mini-% - Initial-Maxi-%)
       ]
 
-
-      set PER *-p-Error-Copy-Rule
-      set PEB *-p-Error-Copy-Behavior
+;set Transcription-error 1
+;set PER *-p-Error-Copy-Rule
+;set PEB *-p-Error-Copy-Behavior
 
       
 ;common-setup
@@ -1963,26 +1967,16 @@ set Num-Agents count turtles
 
 setup-init-turtles
 
+set-life-distribution-USA2010
 if replacement? [
                  init-age-USA2010
-                 set-life-distribution-USA2010
-                 ]
+                ]
 
 set average-path-length nw:mean-path-length
 
 set diameter max [longest-path] of turtles  
 ask links [set color gray]
 set Gray-links links with [color = gray]
-
-;if load-topology? [layout-radial turtles links max-one-of turtles [betweenness-centrality]]
-;if Topology != "Lattice" [;layout-circle sort turtles  (max-pxcor - 1)
-;                          layout-radial turtles links max-one-of turtles [betweenness-centrality] 
-;                          ask links [set color gray]
-;                          
-;                          ]
-
-
-;if Topology != "Lattice" [layout-circle sort turtles  (max-pxcor - 1)]
 
 
 set clustering-coefficient mean  [ node-clustering-coefficient ] of turtles
@@ -1999,7 +1993,6 @@ set original-degrees [degree] of turtles
 set-outputs
 my-update-plots
 ask turtles [establish-color]
-
 reset-ticks
 
 end
@@ -2034,29 +2027,6 @@ ask turtles [
      set score 0.0
      set rule? false
      set behavior? false
-     ;set move? false
-
-
-      set copy-error-rule     PER  
-      set copy-error-behavior PEB
-       
-     
-;ifelse Asynchronous-Updating?
-;     [
-;     ifelse random-init-u?
-;       [
-;       set theta_1 random-float 1.0
-;       set theta_2 random-float 1.0
-;       ]
-;       [
-;       set theta_1 Initial-prob-update-behavior
-;       set theta_2 Initial-prob-update-rule
-;       ]
-;     ]
-;     [
-     set theta_1 1
-     set theta_2 1
-;     ]
 
 set betweenness-centrality nw:betweenness-centrality
 set eigenvector-centrality nw:eigenvector-centrality
@@ -2071,6 +2041,29 @@ set distance-from-other-turtles map [nw:distance-to ?] sort turtles
 set longest-path max distance-from-other-turtles
 
 set mean-path mean distance-from-other-turtles
+set neighbors-who [who] of link-neighbors
+
+     ;set move? false
+;      set copy-error-rule     PER  
+;      set copy-error-behavior PEB
+;       
+;ifelse Asynchronous-Updating?
+;     [
+;     ifelse random-init-u?
+;       [
+;       set theta_1 random-float 1.0
+;       set theta_2 random-float 1.0
+;       ]
+;       [
+;       set theta_1 Initial-prob-update-behavior
+;       set theta_2 Initial-prob-update-rule
+;       ]
+;     ]
+;     [
+;     set theta_1 1
+;     set theta_2 1
+;;     ]
+
 ]
 
 end
@@ -2168,7 +2161,7 @@ SLIDER
 *-strength-of-dilemma
 0
 0.5
-0.25
+0.5
 0.01
 1
 NIL
@@ -2225,17 +2218,17 @@ SLIDER
 *-inicoop
 0
 100
-51
+50
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-373
-417
-574
-450
+385
+313
+586
+346
 *-Connection-Probability
 *-Connection-Probability
 0.0
@@ -2247,76 +2240,76 @@ NIL
 HORIZONTAL
 
 INPUTBOX
-484
-337
-560
-397
+496
+233
+572
+293
 *-Num-Agents
-200
+50
 1
 0
 Number
 
 TEXTBOX
-475
-303
-649
-321
-*Choose Topology and #Agents\n
+386
+207
+560
+225
+*Choose Topology\n
 10
 15.0
 1
 
 CHOOSER
-388
-338
-480
-383
+400
+234
+492
+279
 *-Topology
 *-Topology
 "Random" "Small-World" "Scale-Free" "Lattice"
 2
 
 TEXTBOX
-376
-405
-586
-423
+388
+301
+598
+319
 Random Network Connection Probability
 9
 0.0
 1
 
 TEXTBOX
-377
-455
-527
-473
+389
+351
+539
+369
 Small World Parameters
 9
 0.0
 1
 
 SLIDER
-374
-502
-572
-535
+386
+398
+584
+431
 *-Rewiring-Probability
 *-Rewiring-Probability
 0
 1
-1
+0.049
 .001
 1
 NIL
 HORIZONTAL
 
 SLIDER
-374
-550
-571
+386
+446
 583
+479
 *-Scale-Free-Exponent
 *-Scale-Free-Exponent
 1.5
@@ -2328,10 +2321,10 @@ NIL
 HORIZONTAL
 
 TEXTBOX
-379
-538
-529
-556
+391
+434
+541
+452
 Scale-Free Exponent
 9
 0.0
@@ -2358,15 +2351,15 @@ TEXTBOX
 1
 
 SLIDER
-375
-466
-572
-499
+387
+362
+584
+395
 *-Initial-Neighbours
 *-Initial-Neighbours
 2
 *-Num-Agents - 1
-8
+6
 2
 1
 NIL
@@ -2383,10 +2376,10 @@ Colormap-View
 0
 
 MONITOR
-656
-180
-714
-225
+683
+167
+741
+212
 Maxi %
 count turtles with [ rule = 1 ] * 100 / count turtles
 2
@@ -2394,10 +2387,10 @@ count turtles with [ rule = 1 ] * 100 / count turtles
 11
 
 MONITOR
-717
-181
-775
-226
+744
+168
+802
+213
 Mini %
 count turtles with [rule = 2 ] * 100 / count turtles
 2
@@ -2405,10 +2398,10 @@ count turtles with [rule = 2 ] * 100 / count turtles
 11
 
 MONITOR
-656
-229
-716
-274
+683
+216
+743
+261
 Conf %
 count turtles with [rule = 3 ]  * 100 / count turtles
 2
@@ -2416,10 +2409,10 @@ count turtles with [rule = 3 ]  * 100 / count turtles
 11
 
 MONITOR
-717
-229
-779
-274
+744
+216
+806
+261
 Anti %
 count turtles with [rule = 4 ] * 100 / count turtles
 2
@@ -2459,35 +2452,20 @@ TEXTBOX
 1
 
 TEXTBOX
-382
-114
-574
-132
-*Errors in the copying process?
+385
+128
+577
+146
+*Add noise by replacing the population?
 9
 15.0
 1
 
-SLIDER
-384
-125
-585
-158
-*-p-Error-Copy-Rule
-*-p-Error-Copy-Rule
-0
-.05
-0
-.001
-1
-NIL
-HORIZONTAL
-
 SWITCH
-600
-421
-775
-454
+618
+323
+793
+356
 *-Initial-Random-Types?
 *-Initial-Random-Types?
 0
@@ -2495,20 +2473,20 @@ SWITCH
 -1000
 
 TEXTBOX
-602
-408
-752
-426
+620
+310
+770
+328
 *Random Assignation of Types?
 9
 0.0
 1
 
 INPUTBOX
-599
-470
-684
-530
+617
+372
+702
+432
 *-Initial-Maxi-%
 0
 1
@@ -2516,10 +2494,10 @@ INPUTBOX
 Number
 
 INPUTBOX
-686
-470
-769
-530
+704
+372
+787
+432
 *-Initial-Mini-%
 0
 1
@@ -2527,10 +2505,10 @@ INPUTBOX
 Number
 
 INPUTBOX
-600
-530
-683
-590
+618
+432
+701
+492
 *-Initial-Conf-%
 50
 1
@@ -2538,10 +2516,10 @@ INPUTBOX
 Number
 
 MONITOR
-689
-532
-773
-577
+707
+434
+791
+479
 Initial-Anti-%
 100 - *-Initial-Maxi-% - *-Initial-Mini-% - *-Initial-Conf-%
 0
@@ -2549,40 +2527,40 @@ Initial-Anti-%
 11
 
 TEXTBOX
-600
-456
-787
-476
+618
+358
+805
+378
 Otherwise Input % Initial Types
 9
 0.0
 1
 
 TEXTBOX
-676
-163
-776
-186
+637
+204
+737
+227
 Types %
 9
 0.0
 1
 
 TEXTBOX
-391
-325
-558
-345
+403
+221
+570
+241
 *Network Parameters
 9
 0.0
 1
 
 MONITOR
-655
-27
-752
-72
+708
+23
+805
+68
 Cooperation %
 count turtles with [cooperate? ] * 100 / count turtles
 2
@@ -2590,30 +2568,15 @@ count turtles with [cooperate? ] * 100 / count turtles
 11
 
 MONITOR
-655
-77
-751
-122
+708
+73
+804
+118
 Satisfaction %
 count turtles with [shape = \"face happy\"] * 100 / count turtles
 2
 1
 11
-
-SLIDER
-384
-161
-585
-194
-*-p-Error-Copy-Behavior
-*-p-Error-Copy-Behavior
-0
-.05
-0
-.001
-1
-NIL
-HORIZONTAL
 
 MONITOR
 187
@@ -2648,10 +2611,10 @@ PENS
 "Anti" 1.0 0 -16710653 true "" ""
 
 SWITCH
-575
-343
-695
-376
+387
+509
+507
+542
 load-topology?
 load-topology?
 1
@@ -2659,12 +2622,12 @@ load-topology?
 -1000
 
 INPUTBOX
-698
-336
-774
-396
+510
+502
+586
+562
 FileName
-latticeMinisCop.txt
+/Users/Diana/Documents/StageData/csv/matrixBlogs.txt
 1
 0
 String
@@ -2680,48 +2643,15 @@ Diameter
 1
 11
 
-SWITCH
-384
-198
-584
-231
-error_on_satisfaction
-error_on_satisfaction
-1
-1
--1000
-
 TEXTBOX
-577
-321
-780
-352
+389
+487
+592
+518
 Load a saved Topology? Specify file:
 10
 0.0
 1
-
-SWITCH
-384
-233
-584
-266
-Innovate?
-Innovate?
-1
-1
--1000
-
-SWITCH
-385
-267
-475
-300
-Copy-Thetas?
-Copy-Thetas?
-1
-1
--1000
 
 PLOT
 808
@@ -2800,10 +2730,10 @@ NIL
 1
 
 SWITCH
-485
-269
-636
-302
+405
+144
+556
+177
 *-replacement?
 *-replacement?
 0
@@ -2811,15 +2741,25 @@ SWITCH
 -1000
 
 MONITOR
-675
-134
-761
-179
+719
+121
+805
+166
 New Turtles
 count turtles with [shape = \"target\"] * 100 / count turtles
 2
 1
 11
+
+TEXTBOX
+637
+291
+787
+309
+*Choose types distribution
+9
+15.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
