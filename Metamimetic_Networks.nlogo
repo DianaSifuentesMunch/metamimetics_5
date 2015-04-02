@@ -308,6 +308,7 @@ end
 
 to replace  
 ;    ifelse random-float 1.0 < 0.5 [set cooperate? true][set cooperate? false]        
+    set main-type lput rule main-type 
     set age 0
     set rule? false
     set behavior? false
@@ -324,9 +325,8 @@ to replace
     set score 0.0
     set rule? false
     set behavior? false
-     ;set move? false
 
-
+;set move? false
 ;    set copy-error-rule     PER  
 ;    set copy-error-behavior PEB
 ;       
@@ -1472,6 +1472,7 @@ neighbors-who
 neighbors-type
 ;for outputs
 shuffled?
+main-type
 ]
 
 links-own[
@@ -1823,7 +1824,7 @@ ask ? [
                         n-changes spacer strength-of-dilemma spacer inicoop spacer Rewiring-Probability spacer 
                         Num-Agents spacer Initial-Neighbours spacer FileName spacer 
                         clustering-coefficient spacer average-path-length spacer degree spacer n-links spacer 
-                        neighbors-type spacer neighbors-who)
+                        neighbors-type spacer neighbors-who spacer main-type)
       file-close
       ]
 ]
@@ -2059,7 +2060,7 @@ set distance-from-other-turtles map [nw:distance-to ?] sort turtles
 set longest-path max distance-from-other-turtles
 
 set mean-path mean distance-from-other-turtles
-
+set main-type []
      ;set move? false
 ;      set copy-error-rule     PER  
 ;      set copy-error-behavior PEB
@@ -2753,7 +2754,7 @@ SWITCH
 191
 *-replacement?
 *-replacement?
-1
+0
 1
 -1000
 
