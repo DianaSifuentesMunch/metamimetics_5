@@ -1,8 +1,11 @@
+###need to verify conflicts with libraries 
 
 library(igraph)
-library(sna)
+#library(sna)
+#library(qgraph)
 
 g<-read.graph("graph.graphml" , format="graphml")
+
 
 ###OUTPUTS
 #previous steps
@@ -12,7 +15,6 @@ ind3<-which(V(g)$RULE==3)
 ind4<-which(V(g)$RULE==4)
 NumAgents<-length(V(g))
 closeness<-centralization.closeness (g)
-central<-centralization.degree (g)
 knn<-graph.knn(g)
 triangles<-adjacent.triangles(g)
 vertexConectivity<-vertex.connectivity(g)
@@ -20,7 +22,45 @@ between<-centralization.betweenness (g,directed=FALSE)
 eigen<-centralization.evcent (g)
 degrees<-degree(g)
 degreesNormal<-degree(g,normalized=TRUE)
+y<-get.adjacency(g)
 
+information<-infocent(as.matrix(y))
+centrality<-graphcent(as.matrix(y))
+load<-loadcent(as.matrix(y))
+prestige<-prestige(as.matrix(y))
+stress<-stresscent(as.matrix(y))
+
+# from http://www.shizukalab.com/toolkits/sna/node-level-calculations
+reach2=function(x){
+  r=vector(length=vcount(x))
+  for (i in 1:vcount(x)){
+    n=neighborhood(x,2,nodes=i)
+    ni=unlist(n)
+    l=length(ni)
+    r[i]=(l)/vcount(x)}
+  r}
+
+
+# from http://www.shizukalab.com/toolkits/sna/node-level-calculations
+reach3=function(x){
+  r=vector(length=vcount(x))
+  for (i in 1:vcount(x)){
+    n=neighborhood(x,3)
+    ni=unlist(n)
+    l=length(ni)
+    r[i]=(l)/vcount(x)}
+  r}
+
+# from http://www.shizukalab.com/toolkits/sna/node-level-calculations
+dwreach=function(x){
+  distances=shortest.paths(x) #create matrix of geodesic distances
+  diag(distances)=1 # replace the diagonal with 1s
+  weights=1/distances # take the reciprocal of distances
+  apply(weights,1,sum) # sum for each node (row)
+}
+Reach2<-reach2(g)
+Reach3<-reach3(g)
+DWreach<-dwreach(g)
 
 #LOCAL
 #proportions
@@ -118,17 +158,14 @@ timebehaviorMini<-mean(timebehavior[ind2])
 timebehaviorConf<-mean(timebehavior[ind3]) 
 timebehaviorAnti<-mean(timebehavior[ind4]) 
 
-#centralvertex
-centralvertex<-central$res
-centralvertex<-V(g)$centralvertex
-centralvertexMaxi<-mean(centralvertex[ind1]) 
-centralvertexMini<-mean(centralvertex[ind2]) 
-centralvertexConf<-mean(centralvertex[ind3]) 
-centralvertexAnti<-mean(centralvertex[ind4]) 
+#information
+informationMaxi<-mean(information[ind1]) 
+informationMini<-mean(information[ind2]) 
+informationConf<-mean(information[ind3]) 
+informationAnti<-mean(information[ind4]) 
 
 #bonacich
-bonacich<-bonpow(g)
-bonacich<-V(g)$bonacich
+bonacich<-bonpow(as.matrix(y))
 bonacichMaxi<-mean(bonacich[ind1]) 
 bonacichMini<-mean(bonacich[ind2]) 
 bonacichConf<-mean(bonacich[ind3]) 
@@ -136,18 +173,12 @@ bonacichAnti<-mean(bonacich[ind4])
 
 #eccentricity
 eccentricity<-eccentricity(g)
-eccentricity<-V(g)$eccentricity
 eccentricityMaxi<-mean(eccentricity[ind1]) 
 eccentricityMini<-mean(eccentricity[ind2]) 
 eccentricityConf<-mean(eccentricity[ind3]) 
 eccentricityAnti<-mean(eccentricity[ind4]) 
 
-#knn
-averageNNdegree<-knn$knn
-averageNNdegreeMaxi<-mean(averageNNdegree[ind1]) 
-averageNNdegreeMini<-mean(averageNNdegree[ind2]) 
-averageNNdegreeConf<-mean(averageNNdegree[ind3]) 
-averageNNdegreeAnti<-mean(averageNNdegree[ind4]) 
+
 
 #authority
 authority<-authority.score(g)$vector
@@ -165,6 +196,19 @@ hubMini<-mean(hub[ind2])
 hubConf<-mean(hub[ind3]) 
 hubAnti<-mean(hub[ind4]) 
 
+##neighbor stuff
+#knn (degree of neighbors)
+averageNNdegree<-knn$knn
+averageNNdegreeMaxi<-mean(averageNNdegree[ind1]) 
+averageNNdegreeMini<-mean(averageNNdegree[ind2]) 
+averageNNdegreeConf<-mean(averageNNdegree[ind3]) 
+averageNNdegreeAnti<-mean(averageNNdegree[ind4]) 
+
+#ec of neighbors
+#bc of neighbors
+#cc of neighbors
+#cc of neighbors
+#ec of neighbors
 
 #global
 #articulationPoints<-articulation.points(g)
@@ -179,6 +223,11 @@ closenessgraph<-closeness$centralization
 centralgraph<-central$centralization
 betweengraph<-between$centralization
 eigengraph<-eigen$centralization
+
+smallworld<-smallworldness(g)
+smallworldness<-smallworld[1]
+smallworldness<-smallworld[1]
+
 #########################################
 #sds?
 #do dataframe and plotting functions 
@@ -211,7 +260,8 @@ eigengraph<-eigen$centralization
 #vertex.attributes(g)
 #cliques
 #communities
+#modified versions of betweeness and clustering for flow of energy acc to fleischer and brenes 
+#flow betweenness takes forever tocompute on 100 nodes.. flowbet(as.matrix(y))
 
-#neighbors are measured in their degree and mean values for centrality measures... other community values? explore for real world networks
 write.csv(c,file="betweenness.csv")
 

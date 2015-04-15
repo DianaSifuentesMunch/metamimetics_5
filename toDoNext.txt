@@ -1,14 +1,16 @@
 finish open mole connection to R do a first test
+add scale free with small world network construction? 
 add scale free efficient step
-measure sf for general ntwks 
-define correct death distribution
+measure sf for general ntwks (done) 
+
+define correct death distribution (check with david)
 test compilation time gain 
 
 *IDEA on Replacement:
 with replacement, New turtles are initialised with inicoop value probability. You can see how new generations initialisation can change overall cooperation, but not satisfaction or proportions greatly. Interesting idea on effects of new generations setup. 
 Also can test init on certain rules: "all are born x type" or "all are born what the majority of neighbours establish" etc
 
-*Measures identify correct way of measuring the attractor in the presence of noise, or number of steps, etc. stop condition. For example, random network with high p, shows long periods of maxis and long periods of conformists in majority, but it keeps oscilating. How to measures this? 
+*Measures: identify correct way of measuring the attractor in the presence of noise, or number of steps, etc. stop condition. For example, random network with high p, shows long periods of maxis and long periods of conformists in majority, but it keeps oscilating. How to measures this? (interval averages) 
 
   
  
