@@ -1,11 +1,474 @@
 extensions [ nw ]
 
-;Order of commands for outputs: 
-;checkout order when printing sw test (due to dissaperance of turtles) 
-;export-network
-;export-data
-
 ;take measures in noisy settings? 
+;connection to r
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Declare Variables ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ globals [
+
+life-distribution
+infinity
+
+;for connectivity
+success?
+;; Globals that come from the widget 
+load-topology?
+file.name
+Topology                    ;type of graph
+Num-Agents                  ;number of turtles
+Connection-Probability      ;for random network
+Initial-Neighbours          ;for small world network
+Rewiring-Probability        
+Scale-Free-Exponent         ;for scale-free network
+Initial-Random-Types?       ;Agents' types initialization
+Initial-Maxi-% 
+Initial-Mini-% 
+Initial-Conf-% 
+Initial-Anti-% 
+Strength-of-Dilemma         ;prisoner's dilemma
+inicoop
+replacement?
+cultural-constant
+
+;NETWORK CONSTRUCTION
+;for scale-free
+graphical?
+sequence
+p_k
+Z
+uniform
+radius
+
+
+
+;;OUTPUTS
+  cooperation-rate
+  satisfaction-rate
+  satisfaction-rate2
+;;IN THE NETWORK CONTEXT
+;  clustering-coefficient               ;; average of clustering coefficients of all turtles
+;  average-path-length                  ;; average path length of the network
+;  network-density
+;  diameter
+;  n-links
+;  clustering-coefficient-2
+
+
+;;FOR LATICIZATION OF GRAPHS WILL NOT BE USED HERE ANYMOERE
+;  clustering-lattice
+;  equivalent-path-length-same-degree
+;  SWtest
+;  gammaSW
+;  lambdaSW
+;  Sdelta
+;  equivalent-path-length
+;  equivalent-clustering-coefficient
+;  equivalent-clustering-coefficient-2
+;  omega 
+
+
+;;TURTLE OUTPUTS
+;  original-degrees
+;  mincc
+;  mindeg
+
+
+
+
+; n-changes-list 
+; time-rule-list 
+; rule-at-death-list 
+; time-behavior-list  
+; age-at-death-list
+; nodes-list
+
+;  maxi-before-shuffle
+;  mini-before-shuffle
+;  conf-before-shuffle
+;  anti-before-shuffle
+  maxi
+  mini
+  conf
+  anti
+;  c-maxi  
+;  c-mini  
+;  c-conf  
+;  c-anti 
+
+;  cg-maxi 
+;  cg-mini 
+;  cg-conf 
+;  cg-anti
+
+;  sat-maxi#
+;  sat-mini
+;  sat-conf
+;  sat-anti
+;  sd-sat-maxi
+;  sd-sat-mini
+;  sd-sat-conf
+;  sd-sat-anti
+; mean-degree-1 
+; mean-degree-2 
+; mean-degree-3 
+; mean-degree-4 
+; max-degree-1 
+; max-degree-2 
+; max-degree-3 
+; max-degree-4 
+; mean-cc-1 
+; mean-cc-2 
+; mean-cc-3 
+; mean-cc-4 
+; mean-bc-1 
+; mean-bc-2 
+; mean-bc-3 
+; mean-bc-4  
+; mean-ec-1 
+; mean-ec-2 
+; mean-ec-3 
+; mean-ec-4  
+; mean-pr-1 
+; mean-pr-2 
+; mean-pr-3 
+; mean-pr-4  
+; mean-close-1 
+; mean-close-2 
+; mean-close-3 
+; mean-close-4  
+; mean-changes-1 
+; mean-changes-2 
+; mean-changes-3 
+; mean-changes-4  
+; sd-changes-1 
+; sd-changes-2 
+; sd-changes-3 
+; sd-changes-4  
+; max-tr-1 
+; max-tr-2 
+; max-tr-3 
+; max-tr-4  
+; min-tr-1 
+; min-tr-2 
+; min-tr-3 
+; min-tr-4  
+; max-cc-1
+; max-bc-1
+; max-ec-1
+; max-pr-1
+; max-cc-2
+; max-bc-2
+; max-ec-2
+; max-pr-2
+; max-cc-3
+; max-bc-3
+; max-ec-3
+; max-pr-3
+; max-cc-4
+; max-bc-4
+; max-ec-4
+; max-pr-4
+;max-close-1
+;max-close-2
+;max-close-3
+;max-close-4
+;sd-degree-1 
+; sd-degree-2 
+; sd-degree-3 
+; sd-degree-4 
+; sd-cc-1 
+; sd-cc-2 
+; sd-cc-3 
+; sd-cc-4 
+; sd-bc-1 
+; sd-bc-2 
+; sd-bc-3 
+; sd-bc-4  
+; sd-ec-1 
+; sd-ec-2 
+; sd-ec-3 
+; sd-ec-4  
+; sd-pr-1 
+; sd-pr-2 
+; sd-pr-3 
+; sd-pr-4  
+; sd-close-1 
+; sd-close-2 
+; sd-close-3 
+; sd-close-4  
+; mean-degree   
+; median-degree  
+; mean-cc   
+; median-cc 
+; mean-bc      
+; median-bc    
+; mean-ec      
+; median-ec    
+; mean-pr      
+; median-pr    
+; mean-close     
+; median-close   
+; mean-tr    
+; median-tr  
+; mean-changes    
+; median-changes 
+;shuffled2? 
+;repetitions
+]
+
+
+turtles-own [
+  cooperate?       ;; patch will cooperate
+  rule             ;; patch will have one of four rules: 1=Maxi 2=mini 3=conformist 4=anticonformist  
+  score            ;; score resulting from interaction of neighboring patches. It is dictated by the PD payoffs and the discount factor
+  last-score
+  inst-score
+;  satisfaction
+  satisfaction2
+  age
+  
+  rule?
+  behavior?
+ 
+;for network computations
+;distance-from-other-turtles
+degree
+free-stubs
+;node-clustering-coefficient
+;betweenness-centrality
+;eigenvector-centrality
+;page-rank
+;closeness-centrality
+;longest-path
+;mean-path
+
+;time since last behavior change
+time-rule
+time-behavior
+n-changes
+;neighbors-who
+;neighbors-type
+;for outputs
+shuffled?
+main-type
+
+;  theta_1
+;  theta_2
+;  weighting-history
+;  copy-error-rule
+;  copy-error-behavior
+]
+
+links-own[
+; for small-world 
+ rewired?
+  ]
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to setup
+clear-all
+
+;always need to be setup
+set Num-Agents *-Num-Agents
+set Topology *-Topology
+set Strength-of-Dilemma *-strength-of-dilemma
+set inicoop *-inicoop
+set replacement? *-replacement?
+set cultural-constant *-cultural-constant
+set load-topology? Load-Topology
+
+;only setup if RN
+if Topology = "Random" [set Connection-Probability *-Connection-Probability]
+
+;only setup if SW
+if Topology = "Small-World" [
+                               set Initial-Neighbours *-Initial-Neighbours
+                               set Rewiring-Probability *-Rewiring-Probability
+                               ]
+
+if Topology = "Scale-Free" [set Scale-Free-Exponent *-Scale-Free-Exponent]
+     
+ 
+set Initial-Random-Types? *-Initial-Random-Types?
+if is-number? Initial-Random-Types? 
+[
+ifelse Initial-Random-Types? = 1 [set Initial-Random-Types? true] [set Initial-Random-Types? false] 
+]
+
+if is-number? replacement? 
+[
+ifelse replacement? = 1 [set replacement? true] [set replacement? false] 
+]
+;if is-number? load-topology? 
+;[
+;ifelse load-topology? = 1 [set load-topology? true] [set load-topology? false] 
+;]
+
+
+ifelse not Initial-Random-Types?
+      [
+      set Initial-Maxi-% *-Initial-Maxi-%
+      set Initial-Mini-% *-Initial-Mini-%
+      set Initial-Conf-% *-Initial-Conf-%
+      set Initial-Anti-% (100 - Initial-Conf-% - Initial-Mini-% - Initial-Maxi-%)
+      ]
+      [
+      set Initial-Maxi-% (random-float 1) * 100
+      set Initial-Mini-% (random-float (1 - Initial-Maxi-%)) * 100 
+      set Initial-Conf-% (random-float (1 - Initial-Maxi-% - Initial-Mini-%)) * 100
+      set Initial-Anti-% (100 - Initial-Conf-% - Initial-Mini-% - Initial-Maxi-%)
+      ]
+
+;set Transcription-error 1
+;set PER *-p-Error-Copy-Rule
+;set PEB *-p-Error-Copy-Behavior
+
+
+
+;if Num-Agents > 500
+;[
+;let rows  (ceiling ( sqrt Num-Agents ) ) 
+;let columns (ceiling (Num-Agents / rows )) 
+;set rows (rows / 2 ) 
+;set columns (columns / 2 ) 
+;resize-world ((-1) * rows) (rows - 1) ((-1) * columns) (columns - 1 )
+;]
+set radius ( ( min (list world-width world-height) ) / 2 - 1)  
+;show count patches 
+
+common-setup
+
+ask links [set color gray]
+;set-outputs
+;my-update-plots
+end
+
+to common-setup
+set Initial-Anti-% (100 - Initial-Conf-% - Initial-Mini-% - Initial-Maxi-%)
+set infinity Num-Agents * 100
+if is-number? Initial-Random-Types? 
+[
+ifelse Initial-Random-Types? = 1 [set Initial-Random-Types? true] [set Initial-Random-Types? false] 
+]
+
+if is-number? replacement? 
+[
+ifelse replacement? = 1 [set replacement? true] [set replacement? false] 
+]
+;if is-number? load-topology? 
+;[
+;ifelse load-topology? = 1 [set load-topology? true] [set load-topology? false] 
+;]
+;set average-path-length infinity
+;set n-changes-list  []
+;set time-rule-list  []
+;set rule-at-death-list  []
+;set age-at-death-list []
+;set time-behavior-list  []
+;set nodes-list []
+
+set success? false
+ifelse not load-topology? [setup-Topology] 
+[nw:load-matrix FileName turtles links]
+;[nw:load-graphml FileName 
+; nw:set-context turtles links
+; ]
+
+set Num-Agents count turtles
+setup-init-turtles
+set-life-distribution-USA2010
+if replacement? [
+                 init-age-USA2010
+                ]
+
+;set average-path-length nw:mean-path-length
+;set diameter max [longest-path] of turtles  
+;set clustering-coefficient mean  [ node-clustering-coefficient ] of turtles
+;set clustering-coefficient-2 global-clustering-coefficient
+;set network-density count links * 2 / ( (Num-Agents - 1) * (Num-Agents))
+;set shuffled2? false
+;set n-links count links 
+;set repetitions 0
+
+;set mincc min [node-clustering-coefficient] of turtles
+;set mindeg min [degree] of turtles
+;set original-degrees [degree] of turtles
+ask turtles [establish-color]
+
+reset-ticks
+end
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Open Mole Routines ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to-report go-stop?
+;ifelse all? turtles [shape = "face happy"]
+ifelse ticks > 500
+[report true]
+[report false]
+end
+
+to run-to-grid [tmax]
+common-setup
+while [not go-stop? and ticks < tmax]
+[go]
+reset-ticks
+end 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Setup Turtles ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to setup-init-turtles
+
+if-else Initial-Random-Types? [ask turtles [set rule (random 4) + 1]]      
+  [
+   ask n-of (floor (Initial-Maxi-% * Num-Agents  / 100 )) turtles [set rule 1]
+   ask n-of floor ((Initial-Mini-% * Num-Agents / 100 )) turtles with [rule != 1] [set rule 2]
+   ask n-of floor ((Initial-Conf-% * Num-Agents / 100 )) turtles with [rule != 1 and rule != 2] [set rule 3]
+   ask turtles with [rule != 1 and rule != 2 and rule != 3] [set rule 4]
+  ]
+ 
+ask turtles [      
+     set shape "face sad"
+     set size 1
+     set age 0
+     set satisfaction2 1
+     ifelse random-float 1.0 < (inicoop / 100)
+        [set cooperate? true]
+        [set cooperate? false]
+     establish-color
+     set score 0.0
+     set rule? false
+     set behavior? false
+
+set time-rule 0
+set n-changes 0
+set shuffled? false
+set main-type []
+
+;set distance-from-other-turtles map [nw:distance-to ?] sort turtles      
+;set longest-path max distance-from-other-turtles
+;set mean-path mean distance-from-other-turtles
+;set betweenness-centrality nw:betweenness-centrality
+;set eigenvector-centrality nw:eigenvector-centrality
+;set page-rank nw:page-rank
+;set closeness-centrality nw:closeness-centrality
+;set degree count link-neighbors
+;set node-clustering-coefficient nw:clustering-coefficient 
+
+
+]
+end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; To Go ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -16,29 +479,22 @@ to go
 set Strength-of-Dilemma *-strength-of-dilemma
 set inicoop *-inicoop
 set replacement? *-replacement?
-
-
+set cultural-constant *-cultural-constant
 
 ask turtles [interact]
-
 decision-stage
 learn-stage
 
 ;uncomment to change dynamically on widget
 ask turtles [establish-color]
-ask turtles [set-faces]
-
+;ask turtles [set-faces]
 ask turtles [set satisfaction2 satisfaction-2]
-
 set-outputs            
-
-
 ;uncomment to change dynamically on widget
-;my-update-plots
+my-update-plots
 reset-change
 if replacement? [replacement]
 ask turtles [set age age + 1]
-
 tick
 end
 
@@ -286,12 +742,19 @@ end
 ;;; Life Distributions  ;;;;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;census-dist : fractions of people with age 0, 5, ...100
+;life-dist   : expected life expectancy at ages 0, 5, ...100 (life expectancy = 1/M_age)
+
+;expected rate at which people die per unit time at each age* = M_age* 
+;probability of dying at age* = 1-exp(-M_age*) :: 
+;F_age*= fraction of population of age* that dies within one year :: M_age*=-ln(1-F_age*)
+;if M is done in intervals (as we have here), M is the value at age A+5
+
 to init-age-USA2010 ;;Population fraction for ages according data colected
                                  ;By Lindsay M. Howden and Julie A. Meyer in
                                  ;Age and Sex Composition: 2010 Census briefs
                                  ;Reported fractions have an interval of 5 years starting from 0 until 100 years
   let census-dist (list 0.0654 0.0659 0.0670 0.0714 0.0699 0.0683 0.0647 0.0654 0.0677 0.0735 0.0722 0.0637 0.0545 0.0403 0.0301 0.0237 0.0186 0.0117 0.0047 0.0012 0.0002)
-  ;show length census-dist
   ask turtles [
     let temp-init random 21
     while [random-float 1 > item temp-init census-dist][set temp-init random 21]
@@ -308,47 +771,21 @@ to set-life-distribution-USA2010 ;;Life expectation for ages according data cole
 end
 
 to replace  
-;    ifelse random-float 1.0 < 0.5 [set cooperate? true][set cooperate? false]        
     set main-type lput rule main-type 
     set age 0
     set rule? false
     set behavior? false
-;   set move? false
     set rule (random 4) + 1 
-    ;    move-to one-of (patch-set patches with [not any? turtles-here] patch-here)
     set shape "face sad"
     set size 1
     set satisfaction2 1
     ifelse random-float 1.0 < (inicoop / 100)
         [set cooperate? true]
         [set cooperate? false]
-    establish-color
+ establish-color
     set score 0.0
     set rule? false
     set behavior? false
-
-;set move? false
-;    set copy-error-rule     PER  
-;    set copy-error-behavior PEB
-;       
-     
-;ifelse Asynchronous-Updating?
-;     [
-;     ifelse random-init-u?
-;       [
-;       set theta_1 random-float 1.0
-;       set theta_2 random-float 1.0
-;       ]
-;       [
-;       set theta_1 Initial-prob-update-behavior
-;       set theta_2 Initial-prob-update-rule
-;       ]
-;     ]
-;;     [
-;     set theta_1 1
-;     set theta_2 1
-;;     ]
-
 set time-rule 0
 set n-changes 0
 set shuffled? false
@@ -356,20 +793,23 @@ end
 
 to replacement
   ask turtles [    
-     let index1 floor age / 5
-     let index2 floor (age + 1) / 5
+     let index1 floor age / cultural-constant
+     let index2 floor (age + 1) / cultural-constant
      if index1 > 20 [set index1 20]
      if index2 > 20 [set index2 20]
      
      let ex1 item index1 life-distribution
      let ex2 item index2 life-distribution
      
+
+;;;;;CHANGE THIS ?¿
      let prob-death 1 - (ex1 / (ex2 + 1))
+;;;;;;;;;;;;;
      
      
      ifelse  random-float 1  < prob-death 
        [
-       set-info-death
+;      set-info-death
        replace
        set shape "target" 
        ]
@@ -377,21 +817,21 @@ to replacement
   ]
 end   
 
-to set-info-death
-if ticks > 100
-[
-set n-changes-list lput n-changes n-changes-list
-set time-rule-list lput time-rule time-rule-list
-set rule-at-death-list lput rule rule-at-death-list
-set time-behavior-list lput time-behavior time-behavior-list
-set age-at-death-list lput age age-at-death-list
-set nodes-list lput ([who] of self ) nodes-list
-]
-end
+;to set-info-death
+;if ticks > 100
+;[
+;set n-changes-list lput n-changes n-changes-list
+;set time-rule-list lput time-rule time-rule-list
+;set rule-at-death-list lput rule rule-at-death-list
+;set time-behavior-list lput time-behavior time-behavior-list
+;set age-at-death-list lput age age-at-death-list
+;set nodes-list lput ([who] of self ) nodes-list
+;]
+;end
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Layout  ;;;;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 ;Layout code citation
 ;Wilensky, U. (2005). NetLogo Preferential Attachment model. http://ccl.northwestern.edu/netlogo/models/PreferentialAttachment. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
 ;Wilensky, U. (1999). NetLogo. http://ccl.northwestern.edu/netlogo/. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
@@ -464,14 +904,26 @@ to Create-Lattice
 ;let size-lattice floor sqrt Num-Agents
 ;nw:generate-lattice-2d turtles links size-lattice size-lattice true 
 
-ask patches [sprout 1] ;Num-Agents
+let rows  (ceiling ( sqrt Num-Agents ) ) 
+let columns (ceiling (Num-Agents / rows )) 
+set rows (rows / 2 ) 
+set columns (columns / 2 ) 
+
+let myPatches patches with [ abs (pxcor ) <= rows and abs (pycor ) <= columns ]
+
+ask myPatches [sprout 1] ;Num-Agents
 ask turtles [create-links-with turtles-on neighbors]
 
 ;wrap world 
-let rightcorner patches with   [pxcor = max-pxcor]
-let leftcorner patches  with   [pxcor = min-pxcor]
-let bottomcorner patches with  [pycor = min-pycor]
-let topcorner patches with     [pycor = max-pycor] 
+let maxxcor max [xcor] of turtles
+let minxcor min [xcor] of turtles
+let maxycor max [ycor] of turtles
+let minycor min [ycor] of turtles
+
+let rightcorner patches with   [pxcor = maxxcor]
+let leftcorner patches  with   [pxcor = minxcor]
+let bottomcorner patches with  [pycor = maxycor]
+let topcorner patches with     [pycor = minycor] 
 
 set rightcorner turtles-on rightcorner
 set leftcorner turtles-on leftcorner
@@ -487,7 +939,7 @@ ask bottomcorner [create-links-with topcorner with [ pxcor = [pxcor + 1 ] of mys
 ask bottomcorner [create-links-with topcorner with [ pxcor = [pxcor - 1] of myself  ]]
 
 
-let corners (patch-set  patch min-pxcor min-pycor patch min-pxcor max-pycor patch max-pxcor max-pycor patch max-pxcor min-pycor)
+let corners (patch-set  patch minxcor minycor patch minxcor maxycor patch maxxcor maxycor patch maxxcor minycor)
 ask turtles-on corners [create-links-with other turtles-on corners] 
 
 ask links [set color black]
@@ -497,7 +949,6 @@ set success? true
 end
 
 to lattice-2
-
 ask patches [sprout 1] ;Num-Agents
 ask turtles [create-links-with turtles-on neighbors]
 
@@ -525,6 +976,8 @@ ask links [set color black]
 
 set success? true
 end
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Random Network ;;;;;;;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -551,204 +1004,203 @@ while [not success?]
 end
 
 
-to Create-Measures-for-Small-World 
-
-;;;for equivalent random network
-set SWtest false
-set gammaSW infinity * (-1)
-set lambdaSW infinity * (-1)
-set Sdelta infinity * (-1)
-let mean-path-length false
-;for equivalent random network with same degree distribution
-create-equivalent-random-network-with-same-degree 
-nw:set-context turtles links
-
-set mean-path-length nw:mean-path-length
-set equivalent-path-length mean-path-length
-ask turtles [set node-clustering-coefficient nw:clustering-coefficient]
-set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of turtles
-set equivalent-clustering-coefficient-2      global-clustering-coefficient
-
-set gammaSW (clustering-coefficient-2 / equivalent-clustering-coefficient-2)
-set lambdaSW (average-path-length / equivalent-path-length)
-set Sdelta (gammaSW / lambdaSW) 
-if Sdelta > 1 [set SWtest true]
-
-;;;Create Equivalent Ring Lattice
-;ask turtles [set color red]
-;let Red-turtles turtles with [color = red ]
-;nw:set-context Red-turtles links 
-;set clustering-lattice global-clustering-coefficient
-;set omega ( (equivalent-path-length-same-degree / average-path-length) - (clustering-coefficient-2 / clustering-lattice) )
-end
-
-to create-equivalent-ring-lattice-with-same-degree
-print("Creating an Equivalent Ring Lattice with Same Degree")
-
-ask turtles [set free-stubs degree]
-layout-circle sort turtles (radius )
-let current-turtle-1 nobody 
-let total-neighbors 0 
-let total-left 0
-let total-right 0 
-let new-right nobody 
-let new-left nobody 
-let free-turtles turtles
-
-while [any? free-turtles]
-[
-set current-turtle-1 max-one-of turtles [free-stubs]
-show [who] of current-turtle-1
-set total-neighbors [degree] of current-turtle-1
-set total-left floor (total-neighbors / 2)
-set total-right ceiling (total-neighbors / 2)
-if total-left + total-right != total-neighbors [print ("wrong count")]
-
-if total-right > 0 [set new-right turtles-to-the-right total-right current-turtle-1]
-if total-left  > 0 [set new-left turtles-to-the-left total-left current-turtle-1 ]
-
-ask current-turtle-1 [
-                     if is-turtle-set? new-right
-                        [
-                        create-links-with new-right [set color green]
-                        set free-stubs (free-stubs - count new-right)
-                        ask new-right [set free-stubs (free-stubs - 1)]
-                        ]
-                     if is-turtle-set? new-left
-                        [
-                        create-links-with new-left [set color green]
-                        set free-stubs (free-stubs - count new-left)
-                        ask new-left [set free-stubs (free-stubs - 1)]
-                        ]
-                     ]
-set free-turtles turtles with [free-stubs > 0]
-]
-print(" finished") 
- ask links with [color = gray] [die]
-end
-
-to-report turtles-to-the-right [k current-turtle]
-let n [who] of current-turtle
-let turtles-right nobody 
-let candidate-turtle nobody 
-let i 1 
-while [not is-turtle-set? turtles-right]
-[ 
-set candidate-turtle turtle ((n + i) mod Num-Agents )
-if [free-stubs] of candidate-turtle > 0 
-[if candidate-turtle != current-turtle [set turtles-right (turtle-set turtles-right candidate-turtle)]]
-
-set candidate-turtle nobody
-set i (i + 1)
-]
-while [count turtles-right < k ]
-[
-set candidate-turtle nobody
-while [not is-turtle? candidate-turtle]
-[ 
-set candidate-turtle turtle ((n + i) mod Num-Agents )
-if [free-stubs] of candidate-turtle > 0 
-[if candidate-turtle != current-turtle [set turtles-right (turtle-set turtles-right candidate-turtle)]]
-set i (i + 1)
-]
-] 
-report turtles-right
-end
-
-to-report turtles-to-the-left [k current-turtle]
-let n [who] of current-turtle
-let turtles-left nobody 
-let candidate-turtle nobody 
-let i 1 
-while [not is-turtle-set? turtles-left]
-[ 
-set candidate-turtle turtle ((n - i) mod Num-Agents )
-if [free-stubs] of candidate-turtle > 0 
-[if candidate-turtle != current-turtle [set turtles-left (turtle-set turtles-left candidate-turtle)]]
-set candidate-turtle nobody
-set i (i + 1)
-]
-while [count turtles-left < k ]
-[
-set candidate-turtle nobody
-while [not is-turtle? candidate-turtle]
-[ 
-set candidate-turtle turtle ((n - i) mod Num-Agents )
-if [free-stubs] of candidate-turtle > 0 
-[if candidate-turtle != current-turtle [set turtles-left (turtle-set turtles-left candidate-turtle)]]
-set i (i + 1)
-]
-] 
-report turtles-left
-end
-
-
-
-to create-equivalent-random-network-with-same-degree
-print("Creating an Equivalent Random Netowrk with Same Degree")
- let current-turtle-1 nobody
- let current-turtle-2 nobody
- let candidate-turtle-1 nobody
- let candidate-turtle-2 nobody
- let swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
- let rewire-count 0
- let candidates-2 nobody  
-while [ rewire-count < ( n-links * 10 )  ]
- [
-set current-turtle-1 nobody
-set current-turtle-2 nobody
-set candidate-turtle-1 nobody
-set candidate-turtle-2 nobody
-set swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
- 
- while [count swap-turtles < 4]
- [
- set current-turtle-1 one-of turtles
- set candidate-turtle-1 one-of [link-neighbors] of current-turtle-1
- set current-turtle-2 one-of turtles with [not member? self (turtle-set current-turtle-1 candidate-turtle-1 ([link-neighbors] of candidate-turtle-1))]
- set candidates-2 turtles with [not member? self (turtle-set current-turtle-1 candidate-turtle-1 ([link-neighbors] of current-turtle-1 )) and member? self [link-neighbors] of current-turtle-2]
- set candidate-turtle-2 one-of candidates-2
- set swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
- ]
- 
- ask link [who] of current-turtle-1 [who] of candidate-turtle-1 [die] 
- ask link [who] of current-turtle-2 [who] of candidate-turtle-2 [die] 
- ask current-turtle-1 [create-link-with candidate-turtle-2]
- ask current-turtle-2 [create-link-with candidate-turtle-1]
- set rewire-count (rewire-count + 1)
-
-]
-print("finished") 
-end
-
-;to create-equivalent-random-network
-;;Create an equivalent random network
-;create-Purples Num-Agents
-;layout-circle turtles ( radius ) 
-;set mean-path-length false
-;set success? false
-;set connected? false
-;while[not connected?]
-;[
-;  ask links [die]
-;  repeat n-links
-;  [
-;    ask one-of turtles [
-;        ask one-of other turtles with [not link-neighbor? myself]
-;        [create-link-with myself [set color violet]]
-;                       ]
-;  ]
-;  set Purple-links links with [color = violet]
-;  nw:set-context Purples Purple-links
-;  set connected? true
-;  set mean-path-length nw:mean-path-length
-;  if not is-number? mean-path-length [set connected? false]
-;]
+;to Create-Measures-for-Small-World 
+;;;;for equivalent random network
+;set SWtest false
+;set gammaSW infinity * (-1)
+;set lambdaSW infinity * (-1)
+;set Sdelta infinity * (-1)
+;let mean-path-length false
+;;for equivalent random network with same degree distribution
+;create-equivalent-random-network-with-same-degree 
+;nw:set-context turtles links
+;
+;set mean-path-length nw:mean-path-length
 ;set equivalent-path-length mean-path-length
-;ask Purples [set node-clustering-coefficient nw:clustering-coefficient]
-;set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of Purples
+;ask turtles [set node-clustering-coefficient nw:clustering-coefficient]
+;set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of turtles
 ;set equivalent-clustering-coefficient-2      global-clustering-coefficient
+;
+;set gammaSW (clustering-coefficient-2 / equivalent-clustering-coefficient-2)
+;set lambdaSW (average-path-length / equivalent-path-length)
+;set Sdelta (gammaSW / lambdaSW) 
+;if Sdelta > 1 [set SWtest true]
+;
+;;;;Create Equivalent Ring Lattice
+;;ask turtles [set color red]
+;;let Red-turtles turtles with [color = red ]
+;;nw:set-context Red-turtles links 
+;;set clustering-lattice global-clustering-coefficient
+;;set omega ( (equivalent-path-length-same-degree / average-path-length) - (clustering-coefficient-2 / clustering-lattice) )
 ;end
+;
+;to create-equivalent-ring-lattice-with-same-degree
+;print("Creating an Equivalent Ring Lattice with Same Degree")
+;
+;ask turtles [set free-stubs degree]
+;layout-circle sort turtles (radius )
+;let current-turtle-1 nobody 
+;let total-neighbors 0 
+;let total-left 0
+;let total-right 0 
+;let new-right nobody 
+;let new-left nobody 
+;let free-turtles turtles
+;
+;while [any? free-turtles]
+;[
+;set current-turtle-1 max-one-of turtles [free-stubs]
+;show [who] of current-turtle-1
+;set total-neighbors [degree] of current-turtle-1
+;set total-left floor (total-neighbors / 2)
+;set total-right ceiling (total-neighbors / 2)
+;if total-left + total-right != total-neighbors [print ("wrong count")]
+;
+;if total-right > 0 [set new-right turtles-to-the-right total-right current-turtle-1]
+;if total-left  > 0 [set new-left turtles-to-the-left total-left current-turtle-1 ]
+;
+;ask current-turtle-1 [
+;                     if is-turtle-set? new-right
+;                        [
+;                        create-links-with new-right [set color green]
+;                        set free-stubs (free-stubs - count new-right)
+;                        ask new-right [set free-stubs (free-stubs - 1)]
+;                        ]
+;                     if is-turtle-set? new-left
+;                        [
+;                        create-links-with new-left [set color green]
+;                        set free-stubs (free-stubs - count new-left)
+;                        ask new-left [set free-stubs (free-stubs - 1)]
+;                        ]
+;                     ]
+;set free-turtles turtles with [free-stubs > 0]
+;]
+;print(" finished") 
+; ask links with [color = gray] [die]
+;end
+;
+;to-report turtles-to-the-right [k current-turtle]
+;let n [who] of current-turtle
+;let turtles-right nobody 
+;let candidate-turtle nobody 
+;let i 1 
+;while [not is-turtle-set? turtles-right]
+;[ 
+;set candidate-turtle turtle ((n + i) mod Num-Agents )
+;if [free-stubs] of candidate-turtle > 0 
+;[if candidate-turtle != current-turtle [set turtles-right (turtle-set turtles-right candidate-turtle)]]
+;
+;set candidate-turtle nobody
+;set i (i + 1)
+;]
+;while [count turtles-right < k ]
+;[
+;set candidate-turtle nobody
+;while [not is-turtle? candidate-turtle]
+;[ 
+;set candidate-turtle turtle ((n + i) mod Num-Agents )
+;if [free-stubs] of candidate-turtle > 0 
+;[if candidate-turtle != current-turtle [set turtles-right (turtle-set turtles-right candidate-turtle)]]
+;set i (i + 1)
+;]
+;] 
+;report turtles-right
+;end
+;
+;to-report turtles-to-the-left [k current-turtle]
+;let n [who] of current-turtle
+;let turtles-left nobody 
+;let candidate-turtle nobody 
+;let i 1 
+;while [not is-turtle-set? turtles-left]
+;[ 
+;set candidate-turtle turtle ((n - i) mod Num-Agents )
+;if [free-stubs] of candidate-turtle > 0 
+;[if candidate-turtle != current-turtle [set turtles-left (turtle-set turtles-left candidate-turtle)]]
+;set candidate-turtle nobody
+;set i (i + 1)
+;]
+;while [count turtles-left < k ]
+;[
+;set candidate-turtle nobody
+;while [not is-turtle? candidate-turtle]
+;[ 
+;set candidate-turtle turtle ((n - i) mod Num-Agents )
+;if [free-stubs] of candidate-turtle > 0 
+;[if candidate-turtle != current-turtle [set turtles-left (turtle-set turtles-left candidate-turtle)]]
+;set i (i + 1)
+;]
+;] 
+;report turtles-left
+;end
+;
+;
+;
+;to create-equivalent-random-network-with-same-degree
+;print("Creating an Equivalent Random Netowrk with Same Degree")
+; let current-turtle-1 nobody
+; let current-turtle-2 nobody
+; let candidate-turtle-1 nobody
+; let candidate-turtle-2 nobody
+; let swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
+; let rewire-count 0
+; let candidates-2 nobody  
+;while [ rewire-count < ( n-links * 10 )  ]
+; [
+;set current-turtle-1 nobody
+;set current-turtle-2 nobody
+;set candidate-turtle-1 nobody
+;set candidate-turtle-2 nobody
+;set swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
+; 
+; while [count swap-turtles < 4]
+; [
+; set current-turtle-1 one-of turtles
+; set candidate-turtle-1 one-of [link-neighbors] of current-turtle-1
+; set current-turtle-2 one-of turtles with [not member? self (turtle-set current-turtle-1 candidate-turtle-1 ([link-neighbors] of candidate-turtle-1))]
+; set candidates-2 turtles with [not member? self (turtle-set current-turtle-1 candidate-turtle-1 ([link-neighbors] of current-turtle-1 )) and member? self [link-neighbors] of current-turtle-2]
+; set candidate-turtle-2 one-of candidates-2
+; set swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
+; ]
+; 
+; ask link [who] of current-turtle-1 [who] of candidate-turtle-1 [die] 
+; ask link [who] of current-turtle-2 [who] of candidate-turtle-2 [die] 
+; ask current-turtle-1 [create-link-with candidate-turtle-2]
+; ask current-turtle-2 [create-link-with candidate-turtle-1]
+; set rewire-count (rewire-count + 1)
+;
+;]
+;print("finished") 
+;end
+;
+;;to create-equivalent-random-network
+;;;Create an equivalent random network
+;;create-Purples Num-Agents
+;;layout-circle turtles ( radius ) 
+;;set mean-path-length false
+;;set success? false
+;;set connected? false
+;;while[not connected?]
+;;[
+;;  ask links [die]
+;;  repeat n-links
+;;  [
+;;    ask one-of turtles [
+;;        ask one-of other turtles with [not link-neighbor? myself]
+;;        [create-link-with myself [set color violet]]
+;;                       ]
+;;  ]
+;;  set Purple-links links with [color = violet]
+;;  nw:set-context Purples Purple-links
+;;  set connected? true
+;;  set mean-path-length nw:mean-path-length
+;;  if not is-number? mean-path-length [set connected? false]
+;;]
+;;set equivalent-path-length mean-path-length
+;;ask Purples [set node-clustering-coefficient nw:clustering-coefficient]
+;;set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of Purples
+;;set equivalent-clustering-coefficient-2      global-clustering-coefficient
+;;end
 
 
 
@@ -920,7 +1372,7 @@ ask (turtle-set current-turtle link-turtle) [set free-stubs (free-stubs - 1)]
 ask link-turtle [set free-turtles other free-turtles]
 ]
 ]
-layout-radial turtles links max-one-of turtles [betweenness-centrality]
+layout-circle turtles radius
 end
 
 to configuration-model ;;star constrained graphicality configuration model more efficient, 
@@ -1202,314 +1654,6 @@ to-report global-clustering-coefficient
   report closed-triplets / triplets
 end
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Open Mole Routines ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-to-report go-stop?
-ifelse all? turtles [shape = "face happy"]
-[report true]
-[report false]
-end
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Declare Variables ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
- globals [
-  cooperation-rate
-  satisfaction-rate
-  satisfaction-rate2
-  mincc
-  mindeg
-
-  life-distribution
-
-
-;IN THE NETWORK CONTEXT
-  clustering-coefficient               ;; average of clustering coefficients of all turtles
-  average-path-length                  ;; average path length of the network
-  network-density
-  diameter
-  n-links
-  clustering-coefficient-2
-  clustering-lattice
-equivalent-path-length-same-degree
-  SWtest
-  gammaSW
-  lambdaSW
-  Sdelta
-equivalent-path-length
-equivalent-clustering-coefficient
-equivalent-clustering-coefficient-2
-omega 
-original-degrees
-Gray-links
-;for connectivity
-success?
-;for small world and random.
-infinity
-
-;for scale-free
-graphical?
-sequence
-p_k
-Z
-uniform
-
-
-radius
-;; Globals that come from the widget 
-Topology                    ;type of graph
-Num-Agents                  ;number of turtles
-Connection-Probability      ;for random network
-Initial-Neighbours          ;for small world network
-Rewiring-Probability        
-Scale-Free-Exponent         ;for scale-free network
-Initial-Random-Types?       ;Agents' types initialization
-Initial-Maxi-% 
-Initial-Mini-% 
-Initial-Conf-% 
-Initial-Anti-% 
-Strength-of-Dilemma         ;prisoner's dilemma
-inicoop
-Asynchronous-Updating?      ;updating type
-;Initial-prob-update-rule
-;Initial-prob-update-behavior
-;random-init-u?
-Transcription-error
-Copy-Error-Random? 
-PER
-PEB
-
-replacement?
-
-
-n-changes-list 
-time-rule-list 
-rule-at-death-list 
-time-behavior-list 
-age-at-death-list
-nodes-list
-
-;OUTPUTS
-
-  maxi-before-shuffle
-  mini-before-shuffle
-  conf-before-shuffle
-  anti-before-shuffle
-
-
-
-  maxi
-  mini
-  conf
-  anti
-  c-maxi  
-  c-mini  
-  c-conf  
-  c-anti 
-  cg-maxi 
-  cg-mini 
-  cg-conf 
-  cg-anti
-  sat-maxi
-  sat-mini
-  sat-conf
-  sat-anti
-  sd-sat-maxi
-  sd-sat-mini
-  sd-sat-conf
-  sd-sat-anti
-  
- mean-degree-1 
- mean-degree-2 
- mean-degree-3 
- mean-degree-4 
- 
- max-degree-1 
- max-degree-2 
- max-degree-3 
- max-degree-4 
- 
- 
-
- 
- mean-cc-1 
- mean-cc-2 
- mean-cc-3 
- mean-cc-4 
- 
- mean-bc-1 
- mean-bc-2 
- mean-bc-3 
- mean-bc-4  
- 
- mean-ec-1 
- mean-ec-2 
- mean-ec-3 
- mean-ec-4  
- 
- mean-pr-1 
- mean-pr-2 
- mean-pr-3 
- mean-pr-4  
- 
- mean-close-1 
- mean-close-2 
- mean-close-3 
- mean-close-4  
- 
- mean-changes-1 
- mean-changes-2 
- mean-changes-3 
- mean-changes-4  
- sd-changes-1 
- sd-changes-2 
- sd-changes-3 
- sd-changes-4  
- 
- max-tr-1 
- max-tr-2 
- max-tr-3 
- max-tr-4  
- 
- min-tr-1 
- min-tr-2 
- min-tr-3 
- min-tr-4  
-
-
- max-cc-1
- max-bc-1
- max-ec-1
- max-pr-1
- max-cc-2
- max-bc-2
- max-ec-2
- max-pr-2
- max-cc-3
- max-bc-3
- max-ec-3
- max-pr-3
- max-cc-4
- max-bc-4
- max-ec-4
- max-pr-4
-max-close-1
-max-close-2
-max-close-3
-max-close-4
-
- 
- sd-degree-1 
- sd-degree-2 
- sd-degree-3 
- sd-degree-4 
- 
- sd-cc-1 
- sd-cc-2 
- sd-cc-3 
- sd-cc-4 
- sd-bc-1 
- sd-bc-2 
- sd-bc-3 
- sd-bc-4  
- sd-ec-1 
- sd-ec-2 
- sd-ec-3 
- sd-ec-4  
- sd-pr-1 
- sd-pr-2 
- sd-pr-3 
- sd-pr-4  
- sd-close-1 
- sd-close-2 
- sd-close-3 
- sd-close-4  
-
-  
-file.name
-
-
- mean-degree   
- median-degree  
- mean-cc   
- median-cc 
- mean-bc      
- median-bc    
- mean-ec      
- median-ec    
- mean-pr      
- median-pr    
- mean-close     
- median-close   
-
- mean-tr    
- median-tr  
- 
- mean-changes    
- median-changes 
-
-
-shuffled2? 
-repetitions
-]
-
-
-turtles-own [
-  cooperate?       ;; patch will cooperate
-  rule             ;; patch will have one of four rules: 1=Maxi 2=mini 3=conformist 4=anticonformist  
- 
-  score            ;; score resulting from interaction of neighboring patches. It is dictated by the PD payoffs and the discount factor
-  last-score
-  inst-score
-;  satisfaction
-  satisfaction2
-  age
-  
-  rule?
-  behavior?
- 
- 
-;  theta_1
-;  theta_2
-
-;  weighting-history
-
-  copy-error-rule
-  copy-error-behavior
-  
-;for network computations
-distance-from-other-turtles
-
-degree
-free-stubs
-node-clustering-coefficient
-betweenness-centrality
-eigenvector-centrality
-page-rank
-closeness-centrality
-longest-path
-mean-path
-
-;time since last behavior change
-time-rule
-time-behavior
-n-changes
-neighbors-who
-neighbors-type
-;for outputs
-shuffled?
-main-type
-]
-
-links-own[
-; for small-world 
- rewired?
-  ]
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Measures ;;;;;;;;;; ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1518,7 +1662,6 @@ links-own[
 
 
 to set-outputs
-
 set cooperation-rate count turtles with [cooperate?] / Num-Agents
 set satisfaction-rate count turtles with [shape = "face happy"] / Num-Agents
 set satisfaction-rate2  mean [satisfaction2] of turtles
@@ -1537,229 +1680,229 @@ set conf count turtles-conf
 set anti count turtles-anti   
 end
 
-to set-final-outputs
-  
-set cooperation-rate count turtles with [cooperate?] / Num-Agents
-set satisfaction-rate count turtles with [shape = "face happy"] / Num-Agents
-set satisfaction-rate2  mean [satisfaction2] of turtles
-
-let turtles-maxi turtles with [rule = 1]
-let turtles-mini turtles with [rule = 2]
-let turtles-conf turtles with [rule = 3]
-let turtles-anti turtles with [rule = 4]
-
-
-set maxi count turtles-maxi  
-set mini count turtles-mini  
-set conf count turtles-conf  
-set anti count turtles-anti   
-
-
-if count turtles-maxi > 0
-[
-  set sat-maxi       mean [satisfaction2] of turtles-maxi  
-  set c-maxi         count turtles-maxi with [cooperate?] / count turtles-maxi
-  set cg-maxi        count turtles-maxi with [cooperate?] / Num-Agents
-  set mean-degree-1  mean [degree] of turtles-maxi  
-  set max-degree-1   max [degree] of turtles-maxi
-  set mean-cc-1      mean [node-clustering-coefficient] of turtles-maxi  
-  set max-cc-1       max [node-clustering-coefficient] of turtles-maxi
-  set mean-bc-1      mean [betweenness-centrality] of turtles-maxi  
-  set max-bc-1       max [betweenness-centrality] of turtles-maxi 
-  set mean-ec-1      mean [eigenvector-centrality] of turtles-maxi  
-  set max-ec-1       max [eigenvector-centrality] of turtles-maxi
-  set mean-pr-1      mean [page-rank] of turtles-maxi  
-  set max-pr-1       max [page-rank] of turtles-maxi 
-  set mean-close-1   mean [closeness-centrality] of turtles-maxi     
-  set max-close-1    max [closeness-centrality] of turtles-maxi  
-  set max-tr-1       max [time-rule] of turtles-maxi  
-  set min-tr-1       min [time-rule] of turtles-maxi  
-  set mean-changes-1 mean [n-changes] of turtles-maxi  
-  
-  if count turtles-maxi > 1
-    [
-      set sd-degree-1    standard-deviation [degree] of turtles-maxi  
-      set sd-cc-1        standard-deviation [node-clustering-coefficient] of turtles-maxi  
-      set sd-bc-1        standard-deviation [betweenness-centrality] of turtles-maxi  
-      set sd-ec-1        standard-deviation [eigenvector-centrality] of turtles-maxi  
-      set sd-pr-1        standard-deviation [page-rank] of turtles-maxi  
-      set sd-close-1    standard-deviation [closeness-centrality] of turtles-maxi  
-      set sd-sat-maxi    standard-deviation [satisfaction2] of turtles-maxi  
-      set sd-changes-1   standard-deviation [n-changes] of turtles-maxi  
-      ]]
-
-
-
-if count turtles-mini > 0
-[
-  set sat-mini       mean [satisfaction2] of turtles-mini  
-  set c-mini         count turtles-mini with [cooperate?] / count turtles-mini
-  set cg-mini        count turtles-mini with [cooperate?] / Num-Agents
-  set mean-degree-2  mean [degree] of turtles-mini  
-  set max-degree-2   max [degree] of turtles-mini
-  set mean-cc-2      mean [node-clustering-coefficient] of turtles-mini  
-  set max-cc-2       max [node-clustering-coefficient] of turtles-mini
-  set mean-bc-2      mean [betweenness-centrality] of turtles-mini  
-  set max-bc-2       max [betweenness-centrality] of turtles-mini 
-  set mean-ec-2      mean [eigenvector-centrality] of turtles-mini  
-  set max-ec-2       max [eigenvector-centrality] of turtles-mini
-  set mean-pr-2      mean [page-rank] of turtles-mini  
-  set max-pr-2       max [page-rank] of turtles-mini 
-  set mean-close-2   mean [closeness-centrality] of turtles-mini     
-  set max-close-2    max [closeness-centrality] of turtles-mini  
-  set max-tr-2       max [time-rule] of turtles-mini  
-  set min-tr-2       min [time-rule] of turtles-mini  
-  set mean-changes-2 mean [n-changes] of turtles-mini  
-  
-  if count turtles-mini > 1
-    [
-      set sd-degree-2    standard-deviation [degree] of turtles-mini  
-      set sd-cc-2        standard-deviation [node-clustering-coefficient] of turtles-mini  
-      set sd-bc-2        standard-deviation [betweenness-centrality] of turtles-mini  
-      set sd-ec-2        standard-deviation [eigenvector-centrality] of turtles-mini  
-      set sd-pr-2        standard-deviation [page-rank] of turtles-mini  
-      set sd-close-2    standard-deviation [closeness-centrality] of turtles-mini  
-      set sd-sat-mini    standard-deviation [satisfaction2] of turtles-mini  
-      set sd-changes-2   standard-deviation [n-changes] of turtles-mini  
-      ]]
-
-
-
-
-if count turtles-conf > 0
-[
-  set sat-conf       mean [satisfaction2] of turtles-conf  
-  set c-conf         count turtles-conf with [cooperate?] / count turtles-conf
-  set cg-conf        count turtles-conf with [cooperate?] / Num-Agents
-  set mean-degree-3  mean [degree] of turtles-conf  
-  set max-degree-3   max [degree] of turtles-conf
-  set mean-cc-3      mean [node-clustering-coefficient] of turtles-conf  
-  set max-cc-3       max [node-clustering-coefficient] of turtles-conf
-  set mean-bc-3      mean [betweenness-centrality] of turtles-conf  
-  set max-bc-3       max [betweenness-centrality] of turtles-conf 
-  set mean-ec-3      mean [eigenvector-centrality] of turtles-conf  
-  set max-ec-3       max [eigenvector-centrality] of turtles-conf
-  set mean-pr-3      mean [page-rank] of turtles-conf  
-  set max-pr-3       max [page-rank] of turtles-conf 
-  set mean-close-3   mean [closeness-centrality] of turtles-conf     
-  set max-close-3    max [closeness-centrality] of turtles-conf  
-  set max-tr-3       max [time-rule] of turtles-conf  
-  set min-tr-3       min [time-rule] of turtles-conf  
-  set mean-changes-3 mean [n-changes] of turtles-conf  
-  
-  if count turtles-conf > 1
-    [
-      set sd-degree-3    standard-deviation [degree] of turtles-conf  
-      set sd-cc-3        standard-deviation [node-clustering-coefficient] of turtles-conf  
-      set sd-bc-3        standard-deviation [betweenness-centrality] of turtles-conf  
-      set sd-ec-3        standard-deviation [eigenvector-centrality] of turtles-conf  
-      set sd-pr-3        standard-deviation [page-rank] of turtles-conf  
-      set sd-close-3    standard-deviation [closeness-centrality] of turtles-conf  
-      set sd-sat-conf    standard-deviation [satisfaction2] of turtles-conf  
-      set sd-changes-3   standard-deviation [n-changes] of turtles-conf  
-      ]]
-
-
-if count turtles-anti > 0
-[
-  set sat-anti       mean [satisfaction2] of turtles-anti  
-  set c-anti         count turtles-anti with [cooperate?] / count turtles-anti
-  set cg-anti        count turtles-anti with [cooperate?] / Num-Agents
-  set mean-degree-4  mean [degree] of turtles-anti  
-  set max-degree-4   max [degree] of turtles-anti
-  set mean-cc-4      mean [node-clustering-coefficient] of turtles-anti  
-  set max-cc-4       max [node-clustering-coefficient] of turtles-anti
-  set mean-bc-4      mean [betweenness-centrality] of turtles-anti  
-  set max-bc-4       max [betweenness-centrality] of turtles-anti 
-  set mean-ec-4      mean [eigenvector-centrality] of turtles-anti  
-  set max-ec-4       max [eigenvector-centrality] of turtles-anti
-  set mean-pr-4      mean [page-rank] of turtles-anti  
-  set max-pr-4       max [page-rank] of turtles-anti 
-  set mean-close-4   mean [closeness-centrality] of turtles-anti     
-  set max-close-4    max [closeness-centrality] of turtles-anti  
-  set max-tr-4       max [time-rule] of turtles-anti  
-  set min-tr-4       min [time-rule] of turtles-anti  
-  set mean-changes-4 mean [n-changes] of turtles-anti  
-  
-  if count turtles-anti > 1
-    [
-      set sd-degree-4    standard-deviation [degree] of turtles-anti  
-      set sd-cc-4        standard-deviation [node-clustering-coefficient] of turtles-anti  
-      set sd-bc-4        standard-deviation [betweenness-centrality] of turtles-anti  
-      set sd-ec-4        standard-deviation [eigenvector-centrality] of turtles-anti  
-      set sd-pr-4        standard-deviation [page-rank] of turtles-anti  
-      set sd-close-4     standard-deviation [closeness-centrality] of turtles-anti  
-      set sd-sat-anti    standard-deviation [satisfaction2] of turtles-anti  
-      set sd-changes-4   standard-deviation [n-changes] of turtles-anti  
-      ]]
-
-
-
-
-
-
-set mean-degree    mean [degree] of turtles  
-set median-degree  median [degree] of turtles
-
-set mean-cc        mean [node-clustering-coefficient] of turtles  
-set median-cc      median [node-clustering-coefficient] of turtles
-
-set mean-bc        mean [betweenness-centrality] of turtles  
-set median-bc      median [betweenness-centrality] of turtles 
-
-set mean-ec        mean [eigenvector-centrality] of turtles  
-set median-ec      median [eigenvector-centrality] of turtles
-
-set mean-pr        mean [page-rank] of turtles  
-set median-pr      median [page-rank] of turtles 
-
-set mean-close     mean [closeness-centrality] of turtles     
-set median-close   median [closeness-centrality] of turtles  
-
-set mean-tr        mean   [time-rule] of turtles    
-set median-tr      median    [time-rule] of turtles    
-
-set mean-changes   mean   [n-changes] of turtles
-set median-changes median [n-changes] of turtles  
-
-
-
-end
-
-
-
-
-
-
-to shuffle-turtles
-set shuffled2? true  ;indicate we're shuffling turtles
-;shuffle
-ask n-of maxi-before-shuffle turtles with [shuffled? = false][
-                                              set rule  1
-                                              set shuffled? true 
-                                              ] 
-ask n-of mini-before-shuffle turtles with [shuffled? = false]     [
-                                              set rule  2
-                                              set shuffled? true 
-                                              ] 
-ask n-of conf-before-shuffle turtles with [shuffled? = false]     [
-                                              set rule  3
-                                              set shuffled? true 
-                                              ] 
-ask n-of anti-before-shuffle turtles with [shuffled? = false]     [
-                                              set rule  4
-                                              set shuffled? true 
-                                              ] 
-
-ask turtles [set shuffled? false]
-end
-
-to count-before-shuffle
-set maxi-before-shuffle count turtles with [rule = 1]  
-set mini-before-shuffle count turtles with [rule = 2]  
-set conf-before-shuffle count turtles with [rule = 3]  
-set anti-before-shuffle count turtles with [rule = 4]   
-end
+;to set-final-outputs
+;  
+;set cooperation-rate count turtles with [cooperate?] / Num-Agents
+;set satisfaction-rate count turtles with [shape = "face happy"] / Num-Agents
+;set satisfaction-rate2  mean [satisfaction2] of turtles
+;
+;let turtles-maxi turtles with [rule = 1]
+;let turtles-mini turtles with [rule = 2]
+;let turtles-conf turtles with [rule = 3]
+;let turtles-anti turtles with [rule = 4]
+;
+;
+;set maxi count turtles-maxi  
+;set mini count turtles-mini  
+;set conf count turtles-conf  
+;set anti count turtles-anti   
+;
+;
+;if count turtles-maxi > 0
+;[
+;  set sat-maxi       mean [satisfaction2] of turtles-maxi  
+;  set c-maxi         count turtles-maxi with [cooperate?] / count turtles-maxi
+;  set cg-maxi        count turtles-maxi with [cooperate?] / Num-Agents
+;  set mean-degree-1  mean [degree] of turtles-maxi  
+;  set max-degree-1   max [degree] of turtles-maxi
+;  set mean-cc-1      mean [node-clustering-coefficient] of turtles-maxi  
+;  set max-cc-1       max [node-clustering-coefficient] of turtles-maxi
+;  set mean-bc-1      mean [betweenness-centrality] of turtles-maxi  
+;  set max-bc-1       max [betweenness-centrality] of turtles-maxi 
+;  set mean-ec-1      mean [eigenvector-centrality] of turtles-maxi  
+;  set max-ec-1       max [eigenvector-centrality] of turtles-maxi
+;  set mean-pr-1      mean [page-rank] of turtles-maxi  
+;  set max-pr-1       max [page-rank] of turtles-maxi 
+;  set mean-close-1   mean [closeness-centrality] of turtles-maxi     
+;  set max-close-1    max [closeness-centrality] of turtles-maxi  
+;  set max-tr-1       max [time-rule] of turtles-maxi  
+;  set min-tr-1       min [time-rule] of turtles-maxi  
+;  set mean-changes-1 mean [n-changes] of turtles-maxi  
+;  
+;  if count turtles-maxi > 1
+;    [
+;      set sd-degree-1    standard-deviation [degree] of turtles-maxi  
+;      set sd-cc-1        standard-deviation [node-clustering-coefficient] of turtles-maxi  
+;      set sd-bc-1        standard-deviation [betweenness-centrality] of turtles-maxi  
+;      set sd-ec-1        standard-deviation [eigenvector-centrality] of turtles-maxi  
+;      set sd-pr-1        standard-deviation [page-rank] of turtles-maxi  
+;      set sd-close-1    standard-deviation [closeness-centrality] of turtles-maxi  
+;      set sd-sat-maxi    standard-deviation [satisfaction2] of turtles-maxi  
+;      set sd-changes-1   standard-deviation [n-changes] of turtles-maxi  
+;      ]]
+;
+;
+;
+;if count turtles-mini > 0
+;[
+;  set sat-mini       mean [satisfaction2] of turtles-mini  
+;  set c-mini         count turtles-mini with [cooperate?] / count turtles-mini
+;  set cg-mini        count turtles-mini with [cooperate?] / Num-Agents
+;  set mean-degree-2  mean [degree] of turtles-mini  
+;  set max-degree-2   max [degree] of turtles-mini
+;  set mean-cc-2      mean [node-clustering-coefficient] of turtles-mini  
+;  set max-cc-2       max [node-clustering-coefficient] of turtles-mini
+;  set mean-bc-2      mean [betweenness-centrality] of turtles-mini  
+;  set max-bc-2       max [betweenness-centrality] of turtles-mini 
+;  set mean-ec-2      mean [eigenvector-centrality] of turtles-mini  
+;  set max-ec-2       max [eigenvector-centrality] of turtles-mini
+;  set mean-pr-2      mean [page-rank] of turtles-mini  
+;  set max-pr-2       max [page-rank] of turtles-mini 
+;  set mean-close-2   mean [closeness-centrality] of turtles-mini     
+;  set max-close-2    max [closeness-centrality] of turtles-mini  
+;  set max-tr-2       max [time-rule] of turtles-mini  
+;  set min-tr-2       min [time-rule] of turtles-mini  
+;  set mean-changes-2 mean [n-changes] of turtles-mini  
+;  
+;  if count turtles-mini > 1
+;    [
+;      set sd-degree-2    standard-deviation [degree] of turtles-mini  
+;      set sd-cc-2        standard-deviation [node-clustering-coefficient] of turtles-mini  
+;      set sd-bc-2        standard-deviation [betweenness-centrality] of turtles-mini  
+;      set sd-ec-2        standard-deviation [eigenvector-centrality] of turtles-mini  
+;      set sd-pr-2        standard-deviation [page-rank] of turtles-mini  
+;      set sd-close-2    standard-deviation [closeness-centrality] of turtles-mini  
+;      set sd-sat-mini    standard-deviation [satisfaction2] of turtles-mini  
+;      set sd-changes-2   standard-deviation [n-changes] of turtles-mini  
+;      ]]
+;
+;
+;
+;
+;if count turtles-conf > 0
+;[
+;  set sat-conf       mean [satisfaction2] of turtles-conf  
+;  set c-conf         count turtles-conf with [cooperate?] / count turtles-conf
+;  set cg-conf        count turtles-conf with [cooperate?] / Num-Agents
+;  set mean-degree-3  mean [degree] of turtles-conf  
+;  set max-degree-3   max [degree] of turtles-conf
+;  set mean-cc-3      mean [node-clustering-coefficient] of turtles-conf  
+;  set max-cc-3       max [node-clustering-coefficient] of turtles-conf
+;  set mean-bc-3      mean [betweenness-centrality] of turtles-conf  
+;  set max-bc-3       max [betweenness-centrality] of turtles-conf 
+;  set mean-ec-3      mean [eigenvector-centrality] of turtles-conf  
+;  set max-ec-3       max [eigenvector-centrality] of turtles-conf
+;  set mean-pr-3      mean [page-rank] of turtles-conf  
+;  set max-pr-3       max [page-rank] of turtles-conf 
+;  set mean-close-3   mean [closeness-centrality] of turtles-conf     
+;  set max-close-3    max [closeness-centrality] of turtles-conf  
+;  set max-tr-3       max [time-rule] of turtles-conf  
+;  set min-tr-3       min [time-rule] of turtles-conf  
+;  set mean-changes-3 mean [n-changes] of turtles-conf  
+;  
+;  if count turtles-conf > 1
+;    [
+;      set sd-degree-3    standard-deviation [degree] of turtles-conf  
+;      set sd-cc-3        standard-deviation [node-clustering-coefficient] of turtles-conf  
+;      set sd-bc-3        standard-deviation [betweenness-centrality] of turtles-conf  
+;      set sd-ec-3        standard-deviation [eigenvector-centrality] of turtles-conf  
+;      set sd-pr-3        standard-deviation [page-rank] of turtles-conf  
+;      set sd-close-3    standard-deviation [closeness-centrality] of turtles-conf  
+;      set sd-sat-conf    standard-deviation [satisfaction2] of turtles-conf  
+;      set sd-changes-3   standard-deviation [n-changes] of turtles-conf  
+;      ]]
+;
+;
+;if count turtles-anti > 0
+;[
+;  set sat-anti       mean [satisfaction2] of turtles-anti  
+;  set c-anti         count turtles-anti with [cooperate?] / count turtles-anti
+;  set cg-anti        count turtles-anti with [cooperate?] / Num-Agents
+;  set mean-degree-4  mean [degree] of turtles-anti  
+;  set max-degree-4   max [degree] of turtles-anti
+;  set mean-cc-4      mean [node-clustering-coefficient] of turtles-anti  
+;  set max-cc-4       max [node-clustering-coefficient] of turtles-anti
+;  set mean-bc-4      mean [betweenness-centrality] of turtles-anti  
+;  set max-bc-4       max [betweenness-centrality] of turtles-anti 
+;  set mean-ec-4      mean [eigenvector-centrality] of turtles-anti  
+;  set max-ec-4       max [eigenvector-centrality] of turtles-anti
+;  set mean-pr-4      mean [page-rank] of turtles-anti  
+;  set max-pr-4       max [page-rank] of turtles-anti 
+;  set mean-close-4   mean [closeness-centrality] of turtles-anti     
+;  set max-close-4    max [closeness-centrality] of turtles-anti  
+;  set max-tr-4       max [time-rule] of turtles-anti  
+;  set min-tr-4       min [time-rule] of turtles-anti  
+;  set mean-changes-4 mean [n-changes] of turtles-anti  
+;  
+;  if count turtles-anti > 1
+;    [
+;      set sd-degree-4    standard-deviation [degree] of turtles-anti  
+;      set sd-cc-4        standard-deviation [node-clustering-coefficient] of turtles-anti  
+;      set sd-bc-4        standard-deviation [betweenness-centrality] of turtles-anti  
+;      set sd-ec-4        standard-deviation [eigenvector-centrality] of turtles-anti  
+;      set sd-pr-4        standard-deviation [page-rank] of turtles-anti  
+;      set sd-close-4     standard-deviation [closeness-centrality] of turtles-anti  
+;      set sd-sat-anti    standard-deviation [satisfaction2] of turtles-anti  
+;      set sd-changes-4   standard-deviation [n-changes] of turtles-anti  
+;      ]]
+;
+;
+;
+;
+;
+;
+;set mean-degree    mean [degree] of turtles  
+;set median-degree  median [degree] of turtles
+;
+;set mean-cc        mean [node-clustering-coefficient] of turtles  
+;set median-cc      median [node-clustering-coefficient] of turtles
+;
+;set mean-bc        mean [betweenness-centrality] of turtles  
+;set median-bc      median [betweenness-centrality] of turtles 
+;
+;set mean-ec        mean [eigenvector-centrality] of turtles  
+;set median-ec      median [eigenvector-centrality] of turtles
+;
+;set mean-pr        mean [page-rank] of turtles  
+;set median-pr      median [page-rank] of turtles 
+;
+;set mean-close     mean [closeness-centrality] of turtles     
+;set median-close   median [closeness-centrality] of turtles  
+;
+;set mean-tr        mean   [time-rule] of turtles    
+;set median-tr      median    [time-rule] of turtles    
+;
+;set mean-changes   mean   [n-changes] of turtles
+;set median-changes median [n-changes] of turtles  
+;
+;
+;
+;end
+;
+;
+;
+;
+;
+;
+;to shuffle-turtles
+;set shuffled2? true  ;indicate we're shuffling turtles
+;;shuffle
+;ask n-of maxi-before-shuffle turtles with [shuffled? = false][
+;                                              set rule  1
+;                                              set shuffled? true 
+;                                              ] 
+;ask n-of mini-before-shuffle turtles with [shuffled? = false]     [
+;                                              set rule  2
+;                                              set shuffled? true 
+;                                              ] 
+;ask n-of conf-before-shuffle turtles with [shuffled? = false]     [
+;                                              set rule  3
+;                                              set shuffled? true 
+;                                              ] 
+;ask n-of anti-before-shuffle turtles with [shuffled? = false]     [
+;                                              set rule  4
+;                                              set shuffled? true 
+;                                              ] 
+;
+;ask turtles [set shuffled? false]
+;end
+;
+;to count-before-shuffle
+;set maxi-before-shuffle count turtles with [rule = 1]  
+;set mini-before-shuffle count turtles with [rule = 2]  
+;set conf-before-shuffle count turtles with [rule = 3]  
+;set anti-before-shuffle count turtles with [rule = 4]   
+;end
 
 
 
@@ -1770,103 +1913,107 @@ end
 ;create files 
 
 
-to create-new-file [prefix]
-set file.name word (word prefix FileName ) ".csv"
-;set-current-directory ""
-end
+;to create-new-file [prefix]
+;set file.name word (word prefix FileName ) ".csv"
+;;set-current-directory ""
+;end
+;
+;
+;to print-data-in-file
+;;; write the information to the file
+;let spacer ","
+;file-open file.name
+;file-print  (list  FileName spacer inicoop  spacer  strength-of-dilemma  spacer  cooperation-rate  spacer  satisfaction-rate  spacer  satisfaction-rate2  spacer
+;                      maxi  spacer     mini  spacer  conf  spacer    anti  spacer 
+;                      sat-maxi  spacer   sat-mini  spacer   sat-conf  spacer  sat-anti  spacer  
+;                      sd-sat-maxi  spacer  sd-sat-mini  spacer  sd-sat-conf  spacer    sd-sat-anti  spacer
+;                      c-maxi  spacer     c-mini  spacer     c-conf  spacer     c-anti  spacer   
+;                      cg-maxi  spacer     cg-mini  spacer     cg-conf  spacer  cg-anti  spacer 
+;                      mean-degree-1  spacer   mean-degree-2  spacer   mean-degree-3  spacer  mean-degree-4  spacer 
+;                       sd-degree-1  spacer   sd-degree-2  spacer  sd-degree-3  spacer   sd-degree-4  spacer 
+;  mean-cc-1  spacer   mean-cc-2  spacer   mean-cc-3  spacer   mean-cc-4  spacer 
+;  sd-cc-1  spacer   sd-cc-2  spacer   sd-cc-3  spacer   sd-cc-4  spacer 
+;  mean-bc-1  spacer   mean-bc-2  spacer   mean-bc-3  spacer   mean-bc-4  spacer  
+;  sd-bc-1  spacer   sd-bc-2  spacer   sd-bc-3  spacer   sd-bc-4  spacer  
+;  mean-ec-1  spacer   mean-ec-2  spacer   mean-ec-3  spacer   mean-ec-4  spacer  
+;  sd-ec-1  spacer   sd-ec-2  spacer   sd-ec-3  spacer   sd-ec-4  spacer  
+;  mean-pr-1  spacer   mean-pr-2  spacer   mean-pr-3  spacer   mean-pr-4  spacer 
+;  sd-pr-1  spacer   sd-pr-2  spacer   sd-pr-3  spacer   sd-pr-4  spacer 
+;  mean-close-1  spacer   mean-close-2  spacer   mean-close-3  spacer   mean-close-4  spacer  
+;  sd-close-1  spacer   sd-close-2  spacer   sd-close-3  spacer   sd-close-4  spacer
+;  max-tr-1  spacer   max-tr-2  spacer   max-tr-3  spacer   max-tr-4   spacer
+;  min-tr-1 spacer  min-tr-2 spacer  min-tr-3 spacer  min-tr-4   spacer
+;mean-changes-1 spacer  mean-changes-2 spacer  mean-changes-3 spacer  mean-changes-4 spacer  
+;sd-changes-1 spacer  sd-changes-2 spacer  sd-changes-3 spacer  sd-changes-4 spacer ticks spacer Rewiring-Probability spacer 
+;max-cc-1 spacer  max-bc-1 spacer  max-ec-1 spacer  max-pr-1 spacer  
+;max-cc-2 spacer  max-bc-2 spacer  max-ec-2 spacer  max-pr-2 spacer
+;max-cc-3 spacer  max-bc-3 spacer   max-ec-3 spacer  max-pr-3 spacer
+;max-cc-4 spacer  max-bc-4 spacer   max-ec-4 spacer  max-pr-4 spacer
+;max-close-1 spacer max-close-2 spacer max-close-3 spacer max-close-4 spacer 
+;mean-degree spacer median-degree  spacer
+;mean-cc spacer median-cc spacer
+;mean-bc spacer median-bc spacer
+;mean-ec spacer median-ec spacer
+;mean-pr spacer median-pr spacer
+;mean-close spacer median-close spacer
+;mean-tr spacer median-tr spacer
+;mean-changes spacer median-changes spacer
+;shuffled2? spacer repetitions spacer
+;Initial-Neighbours spacer Num-Agents spacer diameter spacer network-density spacer average-path-length spacer clustering-coefficient spacer clustering-coefficient-2 spacer n-links 
+;spacer equivalent-clustering-coefficient spacer equivalent-clustering-coefficient-2 spacer equivalent-path-length spacer lambdaSW spacer gammaSW spacer Sdelta spacer SWtest spacer omega)
+;file-close
+;end
+;
+;
+;to export-data
+;;;set the directory where the file will be stored
+;create-new-file ""
+;set-final-outputs
+;print-data-in-file
+;
+;count-before-shuffle
+;shuffle-turtles
+;set-final-outputs
+;print-data-in-file
+;end
+;
+;to export-network
+;set-final-outputs
+;ask turtles [set neighbors-who  [who] of  turtle-set (sort-on [who] link-neighbors) ]
+;ask turtles [set neighbors-type [rule] of turtle-set (sort-on [who] link-neighbors) ]
+;
+;;;set the directory where the file will be stored
+;create-new-file "Network"
+;
+;let spacer ","
+;foreach sort turtles 
+;[
+;ask ? [
+;      file-open file.name
+;      file-print (list  who spacer cooperate?    spacer rule spacer satisfaction2 spacer
+;                        node-clustering-coefficient spacer betweenness-centrality spacer
+;                        eigenvector-centrality  spacer page-rank spacer closeness-centrality spacer
+;                        longest-path spacer mean-path spacer time-rule spacer time-behavior spacer
+;                        n-changes spacer strength-of-dilemma spacer inicoop spacer Rewiring-Probability spacer 
+;                        Num-Agents spacer Initial-Neighbours spacer FileName spacer 
+;                        clustering-coefficient spacer average-path-length spacer degree spacer n-links spacer 
+;                        neighbors-type spacer neighbors-who spacer main-type)
+;      file-close
+;      ]
+;]
+;end
+;
+;
 
-
-to print-data-in-file
-;; write the information to the file
-let spacer ","
-file-open file.name
-file-print  (list  FileName spacer inicoop  spacer  strength-of-dilemma  spacer  cooperation-rate  spacer  satisfaction-rate  spacer  satisfaction-rate2  spacer
-                      maxi  spacer     mini  spacer  conf  spacer    anti  spacer 
-                      sat-maxi  spacer   sat-mini  spacer   sat-conf  spacer  sat-anti  spacer  
-                      sd-sat-maxi  spacer  sd-sat-mini  spacer  sd-sat-conf  spacer    sd-sat-anti  spacer
-                      c-maxi  spacer     c-mini  spacer     c-conf  spacer     c-anti  spacer   
-                      cg-maxi  spacer     cg-mini  spacer     cg-conf  spacer  cg-anti  spacer 
-                      mean-degree-1  spacer   mean-degree-2  spacer   mean-degree-3  spacer  mean-degree-4  spacer 
-                       sd-degree-1  spacer   sd-degree-2  spacer  sd-degree-3  spacer   sd-degree-4  spacer 
-  mean-cc-1  spacer   mean-cc-2  spacer   mean-cc-3  spacer   mean-cc-4  spacer 
-  sd-cc-1  spacer   sd-cc-2  spacer   sd-cc-3  spacer   sd-cc-4  spacer 
-  mean-bc-1  spacer   mean-bc-2  spacer   mean-bc-3  spacer   mean-bc-4  spacer  
-  sd-bc-1  spacer   sd-bc-2  spacer   sd-bc-3  spacer   sd-bc-4  spacer  
-  mean-ec-1  spacer   mean-ec-2  spacer   mean-ec-3  spacer   mean-ec-4  spacer  
-  sd-ec-1  spacer   sd-ec-2  spacer   sd-ec-3  spacer   sd-ec-4  spacer  
-  mean-pr-1  spacer   mean-pr-2  spacer   mean-pr-3  spacer   mean-pr-4  spacer 
-  sd-pr-1  spacer   sd-pr-2  spacer   sd-pr-3  spacer   sd-pr-4  spacer 
-  mean-close-1  spacer   mean-close-2  spacer   mean-close-3  spacer   mean-close-4  spacer  
-  sd-close-1  spacer   sd-close-2  spacer   sd-close-3  spacer   sd-close-4  spacer
-  max-tr-1  spacer   max-tr-2  spacer   max-tr-3  spacer   max-tr-4   spacer
-  min-tr-1 spacer  min-tr-2 spacer  min-tr-3 spacer  min-tr-4   spacer
-mean-changes-1 spacer  mean-changes-2 spacer  mean-changes-3 spacer  mean-changes-4 spacer  
-sd-changes-1 spacer  sd-changes-2 spacer  sd-changes-3 spacer  sd-changes-4 spacer ticks spacer Rewiring-Probability spacer 
-max-cc-1 spacer  max-bc-1 spacer  max-ec-1 spacer  max-pr-1 spacer  
-max-cc-2 spacer  max-bc-2 spacer  max-ec-2 spacer  max-pr-2 spacer
-max-cc-3 spacer  max-bc-3 spacer   max-ec-3 spacer  max-pr-3 spacer
-max-cc-4 spacer  max-bc-4 spacer   max-ec-4 spacer  max-pr-4 spacer
-max-close-1 spacer max-close-2 spacer max-close-3 spacer max-close-4 spacer 
-mean-degree spacer median-degree  spacer
-mean-cc spacer median-cc spacer
-mean-bc spacer median-bc spacer
-mean-ec spacer median-ec spacer
-mean-pr spacer median-pr spacer
-mean-close spacer median-close spacer
-mean-tr spacer median-tr spacer
-mean-changes spacer median-changes spacer
-shuffled2? spacer repetitions spacer
-Initial-Neighbours spacer Num-Agents spacer diameter spacer network-density spacer average-path-length spacer clustering-coefficient spacer clustering-coefficient-2 spacer n-links 
-spacer equivalent-clustering-coefficient spacer equivalent-clustering-coefficient-2 spacer equivalent-path-length spacer lambdaSW spacer gammaSW spacer Sdelta spacer SWtest spacer omega)
-file-close
-end
-
-
-to export-data
-;;set the directory where the file will be stored
-create-new-file ""
-set-final-outputs
-print-data-in-file
-
-count-before-shuffle
-shuffle-turtles
-set-final-outputs
-print-data-in-file
-end
-
-to export-network
-set-final-outputs
-ask turtles [set neighbors-who  [who] of  turtle-set (sort-on [who] link-neighbors) ]
-ask turtles [set neighbors-type [rule] of turtle-set (sort-on [who] link-neighbors) ]
-
-;;set the directory where the file will be stored
-create-new-file "Network"
-
-let spacer ","
-foreach sort turtles 
-[
-ask ? [
-      file-open file.name
-      file-print (list  who spacer cooperate?    spacer rule spacer satisfaction2 spacer
-                        node-clustering-coefficient spacer betweenness-centrality spacer
-                        eigenvector-centrality  spacer page-rank spacer closeness-centrality spacer
-                        longest-path spacer mean-path spacer time-rule spacer time-behavior spacer
-                        n-changes spacer strength-of-dilemma spacer inicoop spacer Rewiring-Probability spacer 
-                        Num-Agents spacer Initial-Neighbours spacer FileName spacer 
-                        clustering-coefficient spacer average-path-length spacer degree spacer n-links spacer 
-                        neighbors-type spacer neighbors-who spacer main-type)
-      file-close
-      ]
-]
-end
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Outputs and Plots ;; ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
+to export-graph
+;let name word (FileName) ".graphml"
+nw:save-graphml "graph.graphml"
+end 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Outputs and Plots ;; ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;
 to my-update-plots  
   set-current-plot "Cooperation"
   set-current-plot-pen "cooperation rate"
@@ -1900,26 +2047,26 @@ to my-update-plots
   set-current-plot-pen "anti"
   ifelse anti > 0 [plot mean [degree] of turtles with [rule = 4]][plot 0]
   
-  
-  set-current-plot "Clustering Coefficient Plot"
-  set-current-plot-pen "maxi"
-  ifelse maxi > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 1]][plot 0]
-  set-current-plot-pen "mini"
-  ifelse mini > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 2]][plot 0]
-  set-current-plot-pen "conf"
-  ifelse conf > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 3]][plot 0]
-  set-current-plot-pen "anti"
-  ifelse anti > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 4]][plot 0]
-  
-  set-current-plot "Page Rank Plot"
-  set-current-plot-pen "maxi"
-  ifelse maxi > 0 [plot mean [page-rank] of turtles with [rule = 1]][plot 0]
-  set-current-plot-pen "mini"
-  ifelse mini > 0 [plot mean [page-rank] of turtles with [rule = 2]][plot 0]
-  set-current-plot-pen "conf"
-  ifelse conf > 0 [plot mean [page-rank] of turtles with [rule = 3]][plot 0]
-  set-current-plot-pen "anti"
-  ifelse anti > 0 [plot mean [page-rank] of turtles with [rule = 4]][plot 0]
+;  
+;  set-current-plot "Clustering Coefficient Plot"
+;  set-current-plot-pen "maxi"
+;  ifelse maxi > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 1]][plot 0]
+;  set-current-plot-pen "mini"
+;  ifelse mini > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 2]][plot 0]
+;  set-current-plot-pen "conf"
+;  ifelse conf > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 3]][plot 0]
+;  set-current-plot-pen "anti"
+;  ifelse anti > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 4]][plot 0]
+;  
+;  set-current-plot "Page Rank Plot"
+;  set-current-plot-pen "maxi"
+;  ifelse maxi > 0 [plot mean [page-rank] of turtles with [rule = 1]][plot 0]
+;  set-current-plot-pen "mini"
+;  ifelse mini > 0 [plot mean [page-rank] of turtles with [rule = 2]][plot 0]
+;  set-current-plot-pen "conf"
+;  ifelse conf > 0 [plot mean [page-rank] of turtles with [rule = 3]][plot 0]
+;  set-current-plot-pen "anti"
+;  ifelse anti > 0 [plot mean [page-rank] of turtles with [rule = 4]][plot 0]
  
 
    
@@ -1931,169 +2078,7 @@ to my-update-plots
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-to setup
-clear-all
-;always need to be setup
-set Num-Agents *-Num-Agents
-set Topology *-Topology
-set Strength-of-Dilemma *-strength-of-dilemma
-set inicoop *-inicoop
-set replacement? *-replacement?
-
-set infinity Num-Agents * 100
-set average-path-length infinity
-set n-changes-list  []
-set time-rule-list  []
-set rule-at-death-list  []
-set age-at-death-list []
-set time-behavior-list  []
-set nodes-list []
-;only setup if RN
-if Topology = "Random" [set Connection-Probability *-Connection-Probability]
-
-;only setup if SW
-if Topology = "Small-World" [
-                               set Initial-Neighbours *-Initial-Neighbours
-                               set Rewiring-Probability *-Rewiring-Probability
-                               ]
-
-if Topology = "Scale-Free" [set Scale-Free-Exponent *-Scale-Free-Exponent]
-     
- 
-set Initial-Random-Types? *-Initial-Random-Types?
-ifelse not Initial-Random-Types?
-      [
-      set Initial-Maxi-% *-Initial-Maxi-%
-      set Initial-Mini-% *-Initial-Mini-%
-      set Initial-Conf-% *-Initial-Conf-%
-      set Initial-Anti-% (100 - Initial-Conf-% - Initial-Mini-% - Initial-Maxi-%)
-      ]
-      [
-      set Initial-Maxi-% (random-float 1) * 100
-      set Initial-Mini-% (random-float (1 - Initial-Maxi-%)) * 100 
-      set Initial-Conf-% (random-float (1 - Initial-Maxi-% - Initial-Mini-%)) * 100
-      set Initial-Anti-% (100 - Initial-Conf-% - Initial-Mini-% - Initial-Maxi-%)
-      ]
-
-;set Transcription-error 1
-;set PER *-p-Error-Copy-Rule
-;set PEB *-p-Error-Copy-Behavior
-;common-setup
-;to common-setup
-
-set success? false
-
-if Num-Agents > 500
-[
-let rows  (ceiling ( sqrt Num-Agents ) ) 
-let columns (ceiling (Num-Agents / rows )) 
-set rows (rows / 2 ) 
-set columns (columns / 2 ) 
-resize-world ((-1) * rows) (rows - 1) ((-1) * columns) (columns - 1 )
-]
-set radius ( ( min (list world-width world-height) ) / 2 - 1)  
-;show count patches 
-
-
-
-ifelse not load-topology? [setup-Topology] 
-[nw:load-matrix FileName turtles links]
-
-;[nw:load-graphml FileName 
-; nw:set-context turtles links
-; ]
-
-
-
-set Num-Agents count turtles
-
-setup-init-turtles
-
-set-life-distribution-USA2010
-if replacement? [
-                 init-age-USA2010
-                ]
-
-;set average-path-length nw:mean-path-length
-;set diameter max [longest-path] of turtles  
-ask links [set color gray]
-;set Gray-links links with [color = gray]
-
-
-;set clustering-coefficient mean  [ node-clustering-coefficient ] of turtles
-;set clustering-coefficient-2 global-clustering-coefficient
-;set network-density count links * 2 / ( (Num-Agents - 1) * (Num-Agents))
-;set shuffled2? false
-;set n-links count links 
-;set repetitions 0
-;
-;set mincc min [node-clustering-coefficient] of turtles
-;set mindeg min [degree] of turtles
-;set original-degrees [degree] of turtles
-
-;ask turtles [establish-color]
-set-outputs
-my-update-plots
-
-reset-ticks
-
-end
-
-
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Setup Turtles ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-to setup-init-turtles
-
-if-else Initial-Random-Types? [ask turtles [set rule (random 4) + 1]]      
-  [
-   ask n-of (floor (Initial-Maxi-% * Num-Agents  / 100 )) turtles [set rule 1]
-   ask n-of floor ((Initial-Mini-% * Num-Agents / 100 )) turtles with [rule != 1] [set rule 2]
-   ask n-of floor ((Initial-Conf-% * Num-Agents / 100 )) turtles with [rule != 1 and rule != 2] [set rule 3]
-   ask turtles with [rule != 1 and rule != 2 and rule != 3] [set rule 4]
-  ]
- 
-ask turtles [      
-     set shape "face sad"
-     set size 1
-     set age 0
-     set satisfaction2 1
-     ifelse random-float 1.0 < (inicoop / 100)
-        [set cooperate? true]
-        [set cooperate? false]
-     establish-color
-     set score 0.0
-     set rule? false
-     set behavior? false
-
-;set betweenness-centrality nw:betweenness-centrality
-;set eigenvector-centrality nw:eigenvector-centrality
-;set page-rank nw:page-rank
-;set closeness-centrality nw:closeness-centrality
-;set degree count link-neighbors
-;set node-clustering-coefficient nw:clustering-coefficient 
-set time-rule 0
-set n-changes 0
-set shuffled? false
-;set distance-from-other-turtles map [nw:distance-to ?] sort turtles      
-;set longest-path max distance-from-other-turtles
-;set mean-path mean distance-from-other-turtles
-set main-type []
-
-]
-
-end
-
 to establish-color  ;; agent procedure
-
 if-else Colormap-View = "Strategies"
 [  if-else rule = 1        [set color red]
     [if-else rule = 2      [set color green]
@@ -2185,7 +2170,7 @@ SLIDER
 *-strength-of-dilemma
 0
 0.5
-0.03
+0.14
 0.01
 1
 NIL
@@ -2242,7 +2227,7 @@ SLIDER
 *-inicoop
 0
 100
-49
+23
 1
 1
 NIL
@@ -2269,7 +2254,7 @@ INPUTBOX
 572
 293
 *-Num-Agents
-10000
+100
 1
 0
 Number
@@ -2292,7 +2277,7 @@ CHOOSER
 *-Topology
 *-Topology
 "Random" "Small-World" "Scale-Free" "Lattice"
-3
+1
 
 TEXTBOX
 388
@@ -2383,7 +2368,7 @@ SLIDER
 *-Initial-Neighbours
 2
 *-Num-Agents - 1
-6
+2
 2
 1
 NIL
@@ -2597,7 +2582,7 @@ MONITOR
 804
 118
 Satisfaction %
-count turtles with [shape = \"face happy\"] * 100 / count turtles
+mean [satisfaction2] of turtles * 100
 2
 1
 11
@@ -2637,10 +2622,10 @@ PENS
 SWITCH
 387
 509
-507
+554
 542
-load-topology?
-load-topology?
+Load-Topology
+Load-Topology
 1
 1
 -1000
@@ -2760,7 +2745,7 @@ SWITCH
 174
 *-replacement?
 *-replacement?
-1
+0
 1
 -1000
 
@@ -2784,6 +2769,21 @@ TEXTBOX
 9
 15.0
 1
+
+SLIDER
+409
+175
+611
+208
+*-cultural-constant
+*-cultural-constant
+.5
+10000
+0.5
+.5
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
