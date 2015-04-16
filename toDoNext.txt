@@ -1,17 +1,23 @@
-finish open mole connection to R do a first test
-add scale free with small world network construction? 
-add scale free efficient step
+finish open mole connection to R do a first test (correct, add, improve, make faster, etc)
 measure sf for general ntwks (done) 
-
-define correct death distribution (check with david)
 test compilation time gain 
+add paragraph on report for bonacich and efficiency, etc. (new measures added yesterday) 
+define correct death distribution (check with david)
+add scale free with small world network construction? (This would be interesting to combine both properties, small world and scale free and see differences with simpler models) 
+add scale free efficient step
 
-*IDEA on Replacement:
-with replacement, New turtles are initialised with inicoop value probability. You can see how new generations initialisation can change overall cooperation, but not satisfaction or proportions greatly. Interesting idea on effects of new generations setup. 
-Also can test init on certain rules: "all are born x type" or "all are born what the majority of neighbours establish" etc
 
 *Measures: identify correct way of measuring the attractor in the presence of noise, or number of steps, etc. stop condition. For example, random network with high p, shows long periods of maxis and long periods of conformists in majority, but it keeps oscilating. How to measures this? (interval averages) 
 
+
+
+*Idea on Replacement:
+with replacement, New turtles are initialised with inicoop value probability. You can see how new generations initialisation can change overall cooperation, but not satisfaction or proportions greatly. Interesting idea on effects of new generations setup. 
+Also can test init on certain rules: "all are born x type" or "all are born what the majority of neighbours establish" etc. Real world idea the dutch children from parents affected by the great famine. 
+
+*idea on evolution: there are different types of natural selection disruptive (population goes from a unimodal curve to a bimodal curve from white black and gray rabbits to white and black rabits. Stabilizing selection (population distribution gets more concentrated at the mean value) and directional in which traits move from one mean to another eg. growing backs of bears in glaciation periods and decrease after glaciations. the point would be to test what shocks drive populations to disruptive, stabilizing or directional selection… 
+
+*idea for after initial results. what about inner communities within the networks? find communities with different algorithms and see if they have a particular distribution of types 
   
  
  
