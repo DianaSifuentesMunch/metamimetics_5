@@ -178,8 +178,6 @@ eccentricityMini<-mean(eccentricity[ind2])
 eccentricityConf<-mean(eccentricity[ind3]) 
 eccentricityAnti<-mean(eccentricity[ind4]) 
 
-
-
 #authority
 authority<-authority.score(g)$vector
 authority<-V(g)$authority
@@ -223,16 +221,16 @@ closenessgraph<-closeness$centralization
 centralgraph<-central$centralization
 betweengraph<-between$centralization
 eigengraph<-eigen$centralization
-
 smallworld<-smallworldness(g)
-smallworldness<-smallworld[1]
-smallworldness<-smallworld[1]
+smallworld<-smallworld[1]
+
+#suffling 
+
 
 #########################################
 #sds?
 #do dataframe and plotting functions 
 #do csv
-
 
 #OTHER POSSIBLE MEASURES
 #averageknnk<-knn$knnk

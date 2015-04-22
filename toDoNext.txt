@@ -19,6 +19,15 @@ Also can test init on certain rules: "all are born x type" or "all are born what
 
 *idea for after initial results. what about inner communities within the networks? find communities with different algorithms and see if they have a particular distribution of types 
   
- 
- 
+Background Bibliography
+  *Niklas Luhman (Social Systems Theory, Socio-Cybernetics)
+*Fco. Parra lima (Socio Cybernetics) 
+Nigel Gilbert (Computational Social Systems) 
+
+ *Morin & Cilliers (Philosophy of Complexity) 
+*Bruno Latour (Actor Network Theory) 
+*John Miller (Computational Economics) 
+*Scott Page (Political Science) 
+Lasse Gerrits (Complexity and Public Policy) 
+*Friedrich Hayek (Economy as a Complex System) 
 

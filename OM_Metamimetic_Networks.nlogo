@@ -9,11 +9,10 @@ extensions [ nw ]
 
  globals [
 
-life-distribution
+life-expectation
+mortality-rate
 infinity
 
-;for connectivity
-success?
 ;; Globals that come from the widget 
 load-topology?
 file.name
@@ -40,14 +39,18 @@ sequence
 p_k
 Z
 uniform
+;for connectivity
+success?
+
+;;appearance 
+sizeT
 radius
-
-
 
 ;;OUTPUTS
   cooperation-rate
   satisfaction-rate
   satisfaction-rate2
+
 ;;IN THE NETWORK CONTEXT
 ;  clustering-coefficient               ;; average of clustering coefficients of all turtles
 ;  average-path-length                  ;; average path length of the network
@@ -56,167 +59,19 @@ radius
 ;  n-links
 ;  clustering-coefficient-2
 
-
-;;FOR LATICIZATION OF GRAPHS WILL NOT BE USED HERE ANYMOERE
-;  clustering-lattice
-;  equivalent-path-length-same-degree
-;  SWtest
-;  gammaSW
-;  lambdaSW
-;  Sdelta
-;  equivalent-path-length
-;  equivalent-clustering-coefficient
-;  equivalent-clustering-coefficient-2
-;  omega 
-
-
-;;TURTLE OUTPUTS
-;  original-degrees
-;  mincc
-;  mindeg
-
-
-
-
+;TURTLE CHANGES
 ; n-changes-list 
 ; time-rule-list 
 ; rule-at-death-list 
 ; time-behavior-list  
-; age-at-death-list
-; nodes-list
+ age-at-death-list
+ nodes-list
 
-;  maxi-before-shuffle
-;  mini-before-shuffle
-;  conf-before-shuffle
-;  anti-before-shuffle
+;TURTLE POPULATION
   maxi
   mini
   conf
   anti
-;  c-maxi  
-;  c-mini  
-;  c-conf  
-;  c-anti 
-
-;  cg-maxi 
-;  cg-mini 
-;  cg-conf 
-;  cg-anti
-
-;  sat-maxi#
-;  sat-mini
-;  sat-conf
-;  sat-anti
-;  sd-sat-maxi
-;  sd-sat-mini
-;  sd-sat-conf
-;  sd-sat-anti
-; mean-degree-1 
-; mean-degree-2 
-; mean-degree-3 
-; mean-degree-4 
-; max-degree-1 
-; max-degree-2 
-; max-degree-3 
-; max-degree-4 
-; mean-cc-1 
-; mean-cc-2 
-; mean-cc-3 
-; mean-cc-4 
-; mean-bc-1 
-; mean-bc-2 
-; mean-bc-3 
-; mean-bc-4  
-; mean-ec-1 
-; mean-ec-2 
-; mean-ec-3 
-; mean-ec-4  
-; mean-pr-1 
-; mean-pr-2 
-; mean-pr-3 
-; mean-pr-4  
-; mean-close-1 
-; mean-close-2 
-; mean-close-3 
-; mean-close-4  
-; mean-changes-1 
-; mean-changes-2 
-; mean-changes-3 
-; mean-changes-4  
-; sd-changes-1 
-; sd-changes-2 
-; sd-changes-3 
-; sd-changes-4  
-; max-tr-1 
-; max-tr-2 
-; max-tr-3 
-; max-tr-4  
-; min-tr-1 
-; min-tr-2 
-; min-tr-3 
-; min-tr-4  
-; max-cc-1
-; max-bc-1
-; max-ec-1
-; max-pr-1
-; max-cc-2
-; max-bc-2
-; max-ec-2
-; max-pr-2
-; max-cc-3
-; max-bc-3
-; max-ec-3
-; max-pr-3
-; max-cc-4
-; max-bc-4
-; max-ec-4
-; max-pr-4
-;max-close-1
-;max-close-2
-;max-close-3
-;max-close-4
-;sd-degree-1 
-; sd-degree-2 
-; sd-degree-3 
-; sd-degree-4 
-; sd-cc-1 
-; sd-cc-2 
-; sd-cc-3 
-; sd-cc-4 
-; sd-bc-1 
-; sd-bc-2 
-; sd-bc-3 
-; sd-bc-4  
-; sd-ec-1 
-; sd-ec-2 
-; sd-ec-3 
-; sd-ec-4  
-; sd-pr-1 
-; sd-pr-2 
-; sd-pr-3 
-; sd-pr-4  
-; sd-close-1 
-; sd-close-2 
-; sd-close-3 
-; sd-close-4  
-; mean-degree   
-; median-degree  
-; mean-cc   
-; median-cc 
-; mean-bc      
-; median-bc    
-; mean-ec      
-; median-ec    
-; mean-pr      
-; median-pr    
-; mean-close     
-; median-close   
-; mean-tr    
-; median-tr  
-; mean-changes    
-; median-changes 
-;shuffled2? 
-;repetitions
 ]
 
 
@@ -229,7 +84,7 @@ turtles-own [
 ;  satisfaction
   satisfaction2
   age
-  
+  n-imitations  
   rule?
   behavior?
  
@@ -345,7 +200,6 @@ set radius ( ( min (list world-width world-height) ) / 2 - 1)
 
 common-setup
 
-ask links [set color gray]
 ;set-outputs
 ;my-update-plots
 end
@@ -370,19 +224,25 @@ ifelse replacement? = 1 [set replacement? true] [set replacement? false]
 ;set n-changes-list  []
 ;set time-rule-list  []
 ;set rule-at-death-list  []
-;set age-at-death-list []
+set age-at-death-list []
 ;set time-behavior-list  []
-;set nodes-list []
+set nodes-list []
 
 set success? false
 ifelse not load-topology? [setup-Topology] 
-[nw:load-matrix FileName turtles links]
+[nw:load-matrix FileName turtles links
+ ask links [set color gray]
+]
 ;[nw:load-graphml FileName 
 ; nw:set-context turtles links
 ; ]
 
+
 set Num-Agents count turtles
 setup-init-turtles
+if Topology != "Lattice" [ask turtles [set size 3]]
+set sizeT [size] of one-of turtles 
+;resize-turtles
 set-life-distribution-USA2010
 if replacement? [
                  init-age-USA2010
@@ -440,7 +300,7 @@ if-else Initial-Random-Types? [ask turtles [set rule (random 4) + 1]]
  
 ask turtles [      
      set shape "face sad"
-     set size 1
+     set size sizeT
      set age 0
      set satisfaction2 1
      ifelse random-float 1.0 < (inicoop / 100)
@@ -487,14 +347,19 @@ learn-stage
 
 ;uncomment to change dynamically on widget
 ask turtles [establish-color]
-;ask turtles [set-faces]
+ask turtles [set-faces]
 ask turtles [set satisfaction2 satisfaction-2]
 set-outputs            
 ;uncomment to change dynamically on widget
 my-update-plots
 reset-change
+
+ask turtles [set n-imitations n-imitations + 1
+             if n-imitations = cultural-constant   [set age age + 1
+                                                    set n-imitations 0
+                                                    ]
+            ]
 if replacement? [replacement]
-ask turtles [set age age + 1]
 tick
 end
 
@@ -743,7 +608,7 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;census-dist : fractions of people with age 0, 5, ...100
-;life-dist   : expected life expectancy at ages 0, 5, ...100 (life expectancy = 1/M_age)
+;life-expect   : expected life expectancy at ages 0, 5, ...100 (life expectancy = 1/M_age)
 
 ;expected rate at which people die per unit time at each age* = M_age* 
 ;probability of dying at age* = 1-exp(-M_age*) :: 
@@ -755,29 +620,71 @@ to init-age-USA2010 ;;Population fraction for ages according data colected
                                  ;Age and Sex Composition: 2010 Census briefs
                                  ;Reported fractions have an interval of 5 years starting from 0 until 100 years
   let census-dist (list 0.0654 0.0659 0.0670 0.0714 0.0699 0.0683 0.0647 0.0654 0.0677 0.0735 0.0722 0.0637 0.0545 0.0403 0.0301 0.0237 0.0186 0.0117 0.0047 0.0012 0.0002)
+  
   ask turtles [
-    let temp-init random 21
-    while [random-float 1 > item temp-init census-dist][set temp-init random 21]
-    set age (temp-init * 5) + random 5
-    ]
+    
+    let index floor random 21
+    while [random-float 1 > item index census-dist]
+          [
+          set index floor random 21
+          ]
+    set age  ( (index) * 5  + random 5)
+              ]
 end
+
+
 
 to set-life-distribution-USA2010 ;;Life expectation for ages according data colected by the Centers for Disease Control
                                  ;and Prevention’s National Center for Health Statistics (NCHS) USA 2010
                                  ;Murphy, Xu, and Kochanek 'Deaths: preliminary data 2010' National Vital Stat. Reports 60-4
                                  ;Reported ages have an interval of 5 years starting from 0 until 100 years
 
-  set life-distribution (list 78.7 74.3 69.3 64.4 59.5 54.8 50.0 45.3 40.6 36.0 31.5 27.2 23.1 19.2 15.5 12.2 9.2 6.6 4.7 3.3 2.4) 
+set life-expectation (list 78.7 74.3 69.3 64.4 59.5 54.8 50.0 45.3 40.6 36.0 31.5 27.2 23.1 19.2 15.5 12.2 9.2 6.6 4.7 3.3 2.4) 
+set mortality-rate map [1 / ?] life-expectation
+end
+
+to-report prob-die
+let index ceiling ( ceiling ( age )  / 5 ) - 1 
+if index > 20 [set index 20]
+if index < 0  [set index 0]
+let mortality item index mortality-rate 
+let prob-to-die ( 1 - exp ( (- 1 ) *  mortality ) )
+let prob-die-imitation ( 1 - exp (  (ln ( 1 - prob-to-die )) / cultural-constant ))
+report prob-die-imitation 
+end
+
+
+to replacement
+  ask turtles [    
+  if      random-float 1  < prob-die 
+             [
+;            set-info-death
+             replace
+             set shape "target"
+             ]
+       ]
+end   
+
+to set-info-death
+;if ticks > 100
+;[
+;set n-changes-list lput n-changes n-changes-list
+;set time-rule-list lput time-rule time-rule-list
+;set rule-at-death-list lput rule rule-at-death-list
+;set time-behavior-list lput time-behavior time-behavior-list
+;set age-at-death-list lput age age-at-death-list
+;set nodes-list lput n-imitations nodes-list
+;]
 end
 
 to replace  
     set main-type lput rule main-type 
-    set age 0
+    set age 0 
     set rule? false
     set behavior? false
     set rule (random 4) + 1 
     set shape "face sad"
-    set size 1
+    set size sizeT
     set satisfaction2 1
     ifelse random-float 1.0 < (inicoop / 100)
         [set cooperate? true]
@@ -786,48 +693,14 @@ to replace
     set score 0.0
     set rule? false
     set behavior? false
+set n-imitations 0
 set time-rule 0
 set n-changes 0
 set shuffled? false
 end
 
-to replacement
-  ask turtles [    
-     let index1 floor age / cultural-constant
-     let index2 floor (age + 1) / cultural-constant
-     if index1 > 20 [set index1 20]
-     if index2 > 20 [set index2 20]
-     
-     let ex1 item index1 life-distribution
-     let ex2 item index2 life-distribution
-     
 
-;;;;;CHANGE THIS ?¿
-     let prob-death 1 - (ex1 / (ex2 + 1))
-;;;;;;;;;;;;;
-     
-     
-     ifelse  random-float 1  < prob-death 
-       [
-;      set-info-death
-       replace
-       set shape "target" 
-       ]
-       [set age age + 1]
-  ]
-end   
 
-;to set-info-death
-;if ticks > 100
-;[
-;set n-changes-list lput n-changes n-changes-list
-;set time-rule-list lput time-rule time-rule-list
-;set rule-at-death-list lput rule rule-at-death-list
-;set time-behavior-list lput time-behavior time-behavior-list
-;set age-at-death-list lput age age-at-death-list
-;set nodes-list lput ([who] of self ) nodes-list
-;]
-;end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Layout  ;;;;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -904,10 +777,11 @@ to Create-Lattice
 ;let size-lattice floor sqrt Num-Agents
 ;nw:generate-lattice-2d turtles links size-lattice size-lattice true 
 
-let rows  (ceiling ( sqrt Num-Agents ) ) 
-let columns (ceiling (Num-Agents / rows )) 
-set rows (rows / 2 ) 
-set columns (columns / 2 ) 
+let rows  floor (sqrt Num-Agents )
+let columns ( floor (Num-Agents / rows ) ) 
+
+set rows ( rows / 2 ) 
+set columns ( columns / 2 ) 
 
 let myPatches patches with [ abs (pxcor ) <= rows and abs (pycor ) <= columns ]
 
@@ -946,36 +820,75 @@ ask links [set color black]
 
 set success? true
 ;set average-path-length nw:mean-path-length 
+spread-turtles
+set sizeT [size] of one-of turtles 
+
+
 end
 
-to lattice-2
-ask patches [sprout 1] ;Num-Agents
-ask turtles [create-links-with turtles-on neighbors]
+to spread-turtles
+let num-rows  length remove-duplicates sort [ycor] of turtles
+let num-cols  length remove-duplicates sort [xcor] of turtles 
 
-let max-x max [pxcor] of patches
-let min-x min [pxcor] of patches
-let max-y max [pycor] of patches
-let min-y min [pycor] of patches
-;wrap world 
-ask turtles with [xcor = max-x and ycor < max-y and ycor > min-y] [
-                                                                  create-links-with turtles-on (patch-set (patch min-x ycor) (patch min-x (ycor + 1)) (patch min-x (ycor - 1)))
-                                                                  ]
-ask turtles with [ycor = min-y and xcor < max-x and xcor > min-x] [
-                                                                  create-links-with turtles-on (patch-set (patch xcor max-y) (patch (xcor - 1) max-y) (patch (xcor + 1) max-y))
-                                                                  ]
-ask turtles with [xcor = min-x and ycor < max-y and ycor > min-y and count link-neighbors < 8] [
-                                                                  create-links-with turtles-on (patch-set (patch max-x ycor) (patch max-x (ycor + 1)) (patch max-x (ycor - 1)))
-                                                                  ]
-ask turtles with [ycor = max-y and xcor < max-x and xcor > min-x and count link-neighbors < 8] [
-                                                                  create-links-with turtles-on (patch-set (patch xcor min-y) (patch (xcor - 1) min-y) (patch (xcor + 1) min-y))
-                                                                  ]
+let horizontal-spacing (world-width / num-cols) 
+let vertical-spacing   (world-height / num-rows) 
+;let min-xpos (min-pxcor - 0.5 + horizontal-spacing / 2) 
+;let min-ypos (min-pycor - 0.5 + vertical-spacing / 2) 
 
-let corners (patch-set  patch min-x min-y patch min-x max-y  patch max-x max-y patch max-x min-y)
-ask turtles-on corners [create-links-with other turtles-on corners] 
-ask links [set color black]
 
-set success? true
+ask turtles [ 
+     let x ( xcor * horizontal-spacing)
+     let y ( ycor * vertical-spacing) 
+     setxy (x) (y) 
+] 
+
+;ask turtles [set size ceiling sqrt distance  (  one-of link-neighbors ) * 1.5]
+ask turtles [set size min (list horizontal-spacing vertical-spacing)]
 end
+
+
+;to resize-turtles
+;let num-rows  length remove-duplicates sort [ycor] of turtles
+;let num-cols  length remove-duplicates sort [xcor] of turtles 
+;
+;let horizontal-spacing (world-width / num-cols) 
+;let vertical-spacing   (world-height / num-rows) 
+;;let min-xpos (min-pxcor - 0.5 + horizontal-spacing / 2) 
+;;let min-ypos (min-pycor - 0.5 + vertical-spacing / 2) 
+;
+;;ask turtles [set size ceiling sqrt distance  (  one-of link-neighbors ) * 1.5]
+;set sizeT min (list horizontal-spacing vertical-spacing)
+;ask turtles [set size sizeT]
+;end
+
+;to lattice-2
+;ask patches [sprout 1] ;Num-Agents
+;ask turtles [create-links-with turtles-on neighbors]
+;
+;let max-x max [pxcor] of patches
+;let min-x min [pxcor] of patches
+;let max-y max [pycor] of patches
+;let min-y min [pycor] of patches
+;;wrap world 
+;ask turtles with [xcor = max-x and ycor < max-y and ycor > min-y] [
+;                                                                  create-links-with turtles-on (patch-set (patch min-x ycor) (patch min-x (ycor + 1)) (patch min-x (ycor - 1)))
+;                                                                  ]
+;ask turtles with [ycor = min-y and xcor < max-x and xcor > min-x] [
+;                                                                  create-links-with turtles-on (patch-set (patch xcor max-y) (patch (xcor - 1) max-y) (patch (xcor + 1) max-y))
+;                                                                  ]
+;ask turtles with [xcor = min-x and ycor < max-y and ycor > min-y and count link-neighbors < 8] [
+;                                                                  create-links-with turtles-on (patch-set (patch max-x ycor) (patch max-x (ycor + 1)) (patch max-x (ycor - 1)))
+;                                                                  ]
+;ask turtles with [ycor = max-y and xcor < max-x and xcor > min-x and count link-neighbors < 8] [
+;                                                                  create-links-with turtles-on (patch-set (patch xcor min-y) (patch (xcor - 1) min-y) (patch (xcor + 1) min-y))
+;                                                                  ]
+;
+;let corners (patch-set  patch min-x min-y patch min-x max-y  patch max-x max-y patch max-x min-y)
+;ask turtles-on corners [create-links-with other turtles-on corners] 
+;ask links [set color black]
+;
+;set success? true
+;end
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1680,6 +1593,85 @@ set conf count turtles-conf
 set anti count turtles-anti   
 end
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Outputs and Plots ;; ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;
+to my-update-plots  
+  set-current-plot "Cooperation and Satisfaction"
+  set-current-plot-pen "Cooperation" 
+  plot cooperation-rate
+;  set-current-plot-pen "satisfaction"
+;  plot satisfaction-rate
+  set-current-plot-pen "Satisfaction"
+  plot satisfaction-rate2
+;  set-current-plot-pen "Happy and Cooperating"
+;  plot count turtles with [shape = "face happy" and cooperate?] / Num-Agents
+;  
+
+  set-current-plot "Population"
+  set-current-plot-pen "Maxi"
+  plot maxi / Num-Agents
+  set-current-plot-pen "Mini"
+  plot mini / Num-Agents
+  set-current-plot-pen "Conf"
+  plot conf / Num-Agents
+  set-current-plot-pen "Anti"
+  plot anti / Num-Agents
+  
+
+ 
+;  set-current-plot "Degrees Plot"
+;  set-current-plot-pen "maxi"
+;  ifelse maxi > 0 [plot mean [degree] of turtles with [rule = 1]][plot 0]
+;  set-current-plot-pen "mini"
+;  ifelse mini > 0 [plot mean [degree] of turtles with [rule = 2]][plot 0]
+;  set-current-plot-pen "conf"
+;  ifelse conf > 0 [plot mean [degree] of turtles with [rule = 3]][plot 0]
+;  set-current-plot-pen "anti"
+;  ifelse anti > 0 [plot mean [degree] of turtles with [rule = 4]][plot 0]
+  
+;  
+;  set-current-plot "Clustering Coefficient Plot"
+;  set-current-plot-pen "maxi"
+;  ifelse maxi > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 1]][plot 0]
+;  set-current-plot-pen "mini"
+;  ifelse mini > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 2]][plot 0]
+;  set-current-plot-pen "conf"
+;  ifelse conf > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 3]][plot 0]
+;  set-current-plot-pen "anti"
+;  ifelse anti > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 4]][plot 0]
+;  
+;  set-current-plot "Page Rank Plot"
+;  set-current-plot-pen "maxi"
+;  ifelse maxi > 0 [plot mean [page-rank] of turtles with [rule = 1]][plot 0]
+;  set-current-plot-pen "mini"
+;  ifelse mini > 0 [plot mean [page-rank] of turtles with [rule = 2]][plot 0]
+;  set-current-plot-pen "conf"
+;  ifelse conf > 0 [plot mean [page-rank] of turtles with [rule = 3]][plot 0]
+;  set-current-plot-pen "anti"
+;  ifelse anti > 0 [plot mean [page-rank] of turtles with [rule = 4]][plot 0]
+ 
+
+   
+  end
+
+
+
+to establish-color  ;; agent procedure
+if-else Colormap-View = "Strategies"
+[  if-else rule = 1        [set color red]
+    [if-else rule = 2      [set color green]
+      [if-else rule = 3    [set color blue]
+                           [set color white]]]
+]
+[
+  if-else cooperate? [set color blue] [set color orange]
+]
+end
+
+
 ;to set-final-outputs
 ;  
 ;set cooperation-rate count turtles with [cooperate?] / Num-Agents
@@ -2009,86 +2001,7 @@ to export-graph
 ;let name word (FileName) ".graphml"
 nw:save-graphml "graph.graphml"
 end 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Outputs and Plots ;; ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;
-to my-update-plots  
-  set-current-plot "Cooperation"
-  set-current-plot-pen "cooperation rate"
-  plot cooperation-rate
-  set-current-plot-pen "satisfaction"
-  plot satisfaction-rate
-  set-current-plot-pen "satisfaction2"
-  plot satisfaction-rate2
-  set-current-plot-pen "Happy and Cooperating"
-  plot count turtles with [shape = "face happy" and cooperate?] / Num-Agents
-  
-  set-current-plot "population"
-  set-current-plot-pen "Maxi"
-  plot maxi / Num-Agents
-  set-current-plot-pen "mini"
-  plot mini / Num-Agents
-  set-current-plot-pen "Conf"
-  plot conf / Num-Agents
-  set-current-plot-pen "Anti"
-  plot anti / Num-Agents
-  
 
- 
-  set-current-plot "Degrees Plot"
-  set-current-plot-pen "maxi"
-  ifelse maxi > 0 [plot mean [degree] of turtles with [rule = 1]][plot 0]
-  set-current-plot-pen "mini"
-  ifelse mini > 0 [plot mean [degree] of turtles with [rule = 2]][plot 0]
-  set-current-plot-pen "conf"
-  ifelse conf > 0 [plot mean [degree] of turtles with [rule = 3]][plot 0]
-  set-current-plot-pen "anti"
-  ifelse anti > 0 [plot mean [degree] of turtles with [rule = 4]][plot 0]
-  
-;  
-;  set-current-plot "Clustering Coefficient Plot"
-;  set-current-plot-pen "maxi"
-;  ifelse maxi > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 1]][plot 0]
-;  set-current-plot-pen "mini"
-;  ifelse mini > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 2]][plot 0]
-;  set-current-plot-pen "conf"
-;  ifelse conf > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 3]][plot 0]
-;  set-current-plot-pen "anti"
-;  ifelse anti > 0 [plot mean [node-clustering-coefficient] of turtles with [rule = 4]][plot 0]
-;  
-;  set-current-plot "Page Rank Plot"
-;  set-current-plot-pen "maxi"
-;  ifelse maxi > 0 [plot mean [page-rank] of turtles with [rule = 1]][plot 0]
-;  set-current-plot-pen "mini"
-;  ifelse mini > 0 [plot mean [page-rank] of turtles with [rule = 2]][plot 0]
-;  set-current-plot-pen "conf"
-;  ifelse conf > 0 [plot mean [page-rank] of turtles with [rule = 3]][plot 0]
-;  set-current-plot-pen "anti"
-;  ifelse anti > 0 [plot mean [page-rank] of turtles with [rule = 4]][plot 0]
- 
-
-   
-  end
-
-
-
-
-
-
-
-to establish-color  ;; agent procedure
-if-else Colormap-View = "Strategies"
-[  if-else rule = 1        [set color red]
-    [if-else rule = 2      [set color green]
-      [if-else rule = 3    [set color blue]
-                           [set color white]]]
-]
-[
-  if-else cooperate? [set color blue] [set color orange]
-]
-end
 @#$#@#$#@
 GRAPHICS-WINDOW
 32
@@ -2170,7 +2083,7 @@ SLIDER
 *-strength-of-dilemma
 0
 0.5
-0.14
+0.5
 0.01
 1
 NIL
@@ -2181,7 +2094,7 @@ PLOT
 10
 1114
 130
-Cooperation
+Cooperation and Satisfaction
 time
 NIL
 0.0
@@ -2192,17 +2105,15 @@ true
 true
 "" ""
 PENS
-"cooperation rate" 1.0 0 -2674135 true "" ""
-"satisfaction" 1.0 0 -13345367 true "" ""
-"satisfaction2" 1.0 0 -10022847 true "" ""
-"Happy and Cooperating" 1.0 0 -8990512 true "" ""
+"Cooperation" 1.0 0 -2674135 true "" ""
+"Satisfaction" 1.0 0 -13345367 true "" ""
 
 PLOT
 807
 132
 1114
 258
-population
+Population
 time
 fraction
 0.0
@@ -2214,7 +2125,7 @@ true
 "" ""
 PENS
 "Maxi" 1.0 0 -2674135 true "" ""
-"mini" 1.0 0 -13840069 true "" ""
+"Mini" 1.0 0 -13840069 true "" ""
 "Conf" 1.0 0 -13345367 true "" ""
 "Anti" 1.0 0 -16777216 true "" ""
 
@@ -2227,7 +2138,7 @@ SLIDER
 *-inicoop
 0
 100
-23
+60
 1
 1
 NIL
@@ -2242,7 +2153,7 @@ SLIDER
 *-Connection-Probability
 0.0
 1
-0.925
+0.376
 .001
 1
 NIL
@@ -2254,7 +2165,7 @@ INPUTBOX
 572
 293
 *-Num-Agents
-100
+500
 1
 0
 Number
@@ -2277,7 +2188,7 @@ CHOOSER
 *-Topology
 *-Topology
 "Random" "Small-World" "Scale-Free" "Lattice"
-1
+3
 
 TEXTBOX
 388
@@ -2323,7 +2234,7 @@ SLIDER
 *-Scale-Free-Exponent
 1.5
 3.1
-1.83
+2.26
 .01
 1
 NIL
@@ -2368,7 +2279,7 @@ SLIDER
 *-Initial-Neighbours
 2
 *-Num-Agents - 1
-2
+14
 2
 1
 NIL
@@ -2593,7 +2504,7 @@ MONITOR
 267
 481
 Density Links
-count links * 2 / ( (count turtles - 1) * (count turtles))
+density
 2
 1
 11
@@ -2631,10 +2542,10 @@ Load-Topology
 -1000
 
 INPUTBOX
-510
-502
-586
-562
+437
+545
+513
+605
 FileName
 gs.txt
 1
@@ -2777,10 +2688,10 @@ SLIDER
 208
 *-cultural-constant
 *-cultural-constant
-.5
-10000
-0.5
-.5
+1
+50
+1
+1
 1
 NIL
 HORIZONTAL
