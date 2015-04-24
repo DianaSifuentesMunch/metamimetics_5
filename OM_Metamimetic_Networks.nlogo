@@ -1,7 +1,9 @@
 extensions [ nw ]
 
-;take measures in noisy settings? 
-;connection to r
+;R: test 
+;cambiar booleans OM
+;what is the age of turtles at equilibria w/o replacement? vs w/
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Declare Variables ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -87,7 +89,7 @@ turtles-own [
   n-imitations  
   rule?
   behavior?
- 
+ perception
 ;for network computations
 ;distance-from-other-turtles
 degree
@@ -349,15 +351,21 @@ learn-stage
 ask turtles [establish-color]
 ask turtles [set-faces]
 ask turtles [set satisfaction2 satisfaction-2]
+
 set-outputs            
 ;uncomment to change dynamically on widget
 my-update-plots
+
 reset-change
 
 ask turtles [set n-imitations n-imitations + 1
-             if n-imitations = cultural-constant   [set age age + 1
-                                                    set n-imitations 0
-                                                    ]
+             
+             ifelse replacement? 
+             [
+             if  n-imitations >= cultural-constant   [set age age + 1
+                                                      set n-imitations 0
+                                                     ]
+             ][set age age + 1]
             ]
 if replacement? [replacement]
 tick
@@ -414,13 +422,13 @@ ask turtles [
   
 if not satisfaction
 [
-;if random-float 1 <= theta_2 ;only some agents will be allowed to change rule
+;if random-float 1 <= theta ;only some agents will be allowed to change rule
 ;      [
       set rule? true 
       set behavior? true
 ;      ]
        
-; if random-float 1 <= theta_1      
+; if random-float 1 <= theta  
 ;      [set behavior? true]
 ]
 
@@ -615,6 +623,7 @@ end
 ;F_age*= fraction of population of age* that dies within one year :: M_age*=-ln(1-F_age*)
 ;if M is done in intervals (as we have here), M is the value at age A+5
 
+
 to init-age-USA2010 ;;Population fraction for ages according data colected
                                  ;By Lindsay M. Howden and Julie A. Meyer in
                                  ;Age and Sex Composition: 2010 Census briefs
@@ -725,7 +734,7 @@ end
 
 
 to layout
-  ;; the number 3 here is arbitrary; more repetitions slows down the
+  ;; the number here is arbitrary; more repetitions slows down the
   ;; model, but too few gives poor layouts
   repeat 10 [
     ;; the more turtles we have to fit into the same amount of space,
@@ -915,206 +924,6 @@ while [not success?]
 ]
  ask links [set color gray]
 end
-
-
-;to Create-Measures-for-Small-World 
-;;;;for equivalent random network
-;set SWtest false
-;set gammaSW infinity * (-1)
-;set lambdaSW infinity * (-1)
-;set Sdelta infinity * (-1)
-;let mean-path-length false
-;;for equivalent random network with same degree distribution
-;create-equivalent-random-network-with-same-degree 
-;nw:set-context turtles links
-;
-;set mean-path-length nw:mean-path-length
-;set equivalent-path-length mean-path-length
-;ask turtles [set node-clustering-coefficient nw:clustering-coefficient]
-;set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of turtles
-;set equivalent-clustering-coefficient-2      global-clustering-coefficient
-;
-;set gammaSW (clustering-coefficient-2 / equivalent-clustering-coefficient-2)
-;set lambdaSW (average-path-length / equivalent-path-length)
-;set Sdelta (gammaSW / lambdaSW) 
-;if Sdelta > 1 [set SWtest true]
-;
-;;;;Create Equivalent Ring Lattice
-;;ask turtles [set color red]
-;;let Red-turtles turtles with [color = red ]
-;;nw:set-context Red-turtles links 
-;;set clustering-lattice global-clustering-coefficient
-;;set omega ( (equivalent-path-length-same-degree / average-path-length) - (clustering-coefficient-2 / clustering-lattice) )
-;end
-;
-;to create-equivalent-ring-lattice-with-same-degree
-;print("Creating an Equivalent Ring Lattice with Same Degree")
-;
-;ask turtles [set free-stubs degree]
-;layout-circle sort turtles (radius )
-;let current-turtle-1 nobody 
-;let total-neighbors 0 
-;let total-left 0
-;let total-right 0 
-;let new-right nobody 
-;let new-left nobody 
-;let free-turtles turtles
-;
-;while [any? free-turtles]
-;[
-;set current-turtle-1 max-one-of turtles [free-stubs]
-;show [who] of current-turtle-1
-;set total-neighbors [degree] of current-turtle-1
-;set total-left floor (total-neighbors / 2)
-;set total-right ceiling (total-neighbors / 2)
-;if total-left + total-right != total-neighbors [print ("wrong count")]
-;
-;if total-right > 0 [set new-right turtles-to-the-right total-right current-turtle-1]
-;if total-left  > 0 [set new-left turtles-to-the-left total-left current-turtle-1 ]
-;
-;ask current-turtle-1 [
-;                     if is-turtle-set? new-right
-;                        [
-;                        create-links-with new-right [set color green]
-;                        set free-stubs (free-stubs - count new-right)
-;                        ask new-right [set free-stubs (free-stubs - 1)]
-;                        ]
-;                     if is-turtle-set? new-left
-;                        [
-;                        create-links-with new-left [set color green]
-;                        set free-stubs (free-stubs - count new-left)
-;                        ask new-left [set free-stubs (free-stubs - 1)]
-;                        ]
-;                     ]
-;set free-turtles turtles with [free-stubs > 0]
-;]
-;print(" finished") 
-; ask links with [color = gray] [die]
-;end
-;
-;to-report turtles-to-the-right [k current-turtle]
-;let n [who] of current-turtle
-;let turtles-right nobody 
-;let candidate-turtle nobody 
-;let i 1 
-;while [not is-turtle-set? turtles-right]
-;[ 
-;set candidate-turtle turtle ((n + i) mod Num-Agents )
-;if [free-stubs] of candidate-turtle > 0 
-;[if candidate-turtle != current-turtle [set turtles-right (turtle-set turtles-right candidate-turtle)]]
-;
-;set candidate-turtle nobody
-;set i (i + 1)
-;]
-;while [count turtles-right < k ]
-;[
-;set candidate-turtle nobody
-;while [not is-turtle? candidate-turtle]
-;[ 
-;set candidate-turtle turtle ((n + i) mod Num-Agents )
-;if [free-stubs] of candidate-turtle > 0 
-;[if candidate-turtle != current-turtle [set turtles-right (turtle-set turtles-right candidate-turtle)]]
-;set i (i + 1)
-;]
-;] 
-;report turtles-right
-;end
-;
-;to-report turtles-to-the-left [k current-turtle]
-;let n [who] of current-turtle
-;let turtles-left nobody 
-;let candidate-turtle nobody 
-;let i 1 
-;while [not is-turtle-set? turtles-left]
-;[ 
-;set candidate-turtle turtle ((n - i) mod Num-Agents )
-;if [free-stubs] of candidate-turtle > 0 
-;[if candidate-turtle != current-turtle [set turtles-left (turtle-set turtles-left candidate-turtle)]]
-;set candidate-turtle nobody
-;set i (i + 1)
-;]
-;while [count turtles-left < k ]
-;[
-;set candidate-turtle nobody
-;while [not is-turtle? candidate-turtle]
-;[ 
-;set candidate-turtle turtle ((n - i) mod Num-Agents )
-;if [free-stubs] of candidate-turtle > 0 
-;[if candidate-turtle != current-turtle [set turtles-left (turtle-set turtles-left candidate-turtle)]]
-;set i (i + 1)
-;]
-;] 
-;report turtles-left
-;end
-;
-;
-;
-;to create-equivalent-random-network-with-same-degree
-;print("Creating an Equivalent Random Netowrk with Same Degree")
-; let current-turtle-1 nobody
-; let current-turtle-2 nobody
-; let candidate-turtle-1 nobody
-; let candidate-turtle-2 nobody
-; let swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
-; let rewire-count 0
-; let candidates-2 nobody  
-;while [ rewire-count < ( n-links * 10 )  ]
-; [
-;set current-turtle-1 nobody
-;set current-turtle-2 nobody
-;set candidate-turtle-1 nobody
-;set candidate-turtle-2 nobody
-;set swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
-; 
-; while [count swap-turtles < 4]
-; [
-; set current-turtle-1 one-of turtles
-; set candidate-turtle-1 one-of [link-neighbors] of current-turtle-1
-; set current-turtle-2 one-of turtles with [not member? self (turtle-set current-turtle-1 candidate-turtle-1 ([link-neighbors] of candidate-turtle-1))]
-; set candidates-2 turtles with [not member? self (turtle-set current-turtle-1 candidate-turtle-1 ([link-neighbors] of current-turtle-1 )) and member? self [link-neighbors] of current-turtle-2]
-; set candidate-turtle-2 one-of candidates-2
-; set swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
-; ]
-; 
-; ask link [who] of current-turtle-1 [who] of candidate-turtle-1 [die] 
-; ask link [who] of current-turtle-2 [who] of candidate-turtle-2 [die] 
-; ask current-turtle-1 [create-link-with candidate-turtle-2]
-; ask current-turtle-2 [create-link-with candidate-turtle-1]
-; set rewire-count (rewire-count + 1)
-;
-;]
-;print("finished") 
-;end
-;
-;;to create-equivalent-random-network
-;;;Create an equivalent random network
-;;create-Purples Num-Agents
-;;layout-circle turtles ( radius ) 
-;;set mean-path-length false
-;;set success? false
-;;set connected? false
-;;while[not connected?]
-;;[
-;;  ask links [die]
-;;  repeat n-links
-;;  [
-;;    ask one-of turtles [
-;;        ask one-of other turtles with [not link-neighbor? myself]
-;;        [create-link-with myself [set color violet]]
-;;                       ]
-;;  ]
-;;  set Purple-links links with [color = violet]
-;;  nw:set-context Purples Purple-links
-;;  set connected? true
-;;  set mean-path-length nw:mean-path-length
-;;  if not is-number? mean-path-length [set connected? false]
-;;]
-;;set equivalent-path-length mean-path-length
-;;ask Purples [set node-clustering-coefficient nw:clustering-coefficient]
-;;set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of Purples
-;;set equivalent-clustering-coefficient-2      global-clustering-coefficient
-;;end
-
 
 
 
@@ -2002,6 +1811,211 @@ to export-graph
 nw:save-graphml "graph.graphml"
 end 
 
+;;;;;small world ness
+
+;to Create-Measures-for-Small-World 
+;;;;for equivalent random network
+;set SWtest false
+;set gammaSW infinity * (-1)
+;set lambdaSW infinity * (-1)
+;set Sdelta infinity * (-1)
+;let mean-path-length false
+;;for equivalent random network with same degree distribution
+;create-equivalent-random-network-with-same-degree 
+;nw:set-context turtles links
+;
+;set mean-path-length nw:mean-path-length
+;set equivalent-path-length mean-path-length
+;ask turtles [set node-clustering-coefficient nw:clustering-coefficient]
+;set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of turtles
+;set equivalent-clustering-coefficient-2      global-clustering-coefficient
+;
+;set gammaSW (clustering-coefficient-2 / equivalent-clustering-coefficient-2)
+;set lambdaSW (average-path-length / equivalent-path-length)
+;set Sdelta (gammaSW / lambdaSW) 
+;if Sdelta > 1 [set SWtest true]
+;
+;;;;Create Equivalent Ring Lattice
+;;ask turtles [set color red]
+;;let Red-turtles turtles with [color = red ]
+;;nw:set-context Red-turtles links 
+;;set clustering-lattice global-clustering-coefficient
+;;set omega ( (equivalent-path-length-same-degree / average-path-length) - (clustering-coefficient-2 / clustering-lattice) )
+;end
+;
+;to create-equivalent-ring-lattice-with-same-degree
+;print("Creating an Equivalent Ring Lattice with Same Degree")
+;
+;ask turtles [set free-stubs degree]
+;layout-circle sort turtles (radius )
+;let current-turtle-1 nobody 
+;let total-neighbors 0 
+;let total-left 0
+;let total-right 0 
+;let new-right nobody 
+;let new-left nobody 
+;let free-turtles turtles
+;
+;while [any? free-turtles]
+;[
+;set current-turtle-1 max-one-of turtles [free-stubs]
+;show [who] of current-turtle-1
+;set total-neighbors [degree] of current-turtle-1
+;set total-left floor (total-neighbors / 2)
+;set total-right ceiling (total-neighbors / 2)
+;if total-left + total-right != total-neighbors [print ("wrong count")]
+;
+;if total-right > 0 [set new-right turtles-to-the-right total-right current-turtle-1]
+;if total-left  > 0 [set new-left turtles-to-the-left total-left current-turtle-1 ]
+;
+;ask current-turtle-1 [
+;                     if is-turtle-set? new-right
+;                        [
+;                        create-links-with new-right [set color green]
+;                        set free-stubs (free-stubs - count new-right)
+;                        ask new-right [set free-stubs (free-stubs - 1)]
+;                        ]
+;                     if is-turtle-set? new-left
+;                        [
+;                        create-links-with new-left [set color green]
+;                        set free-stubs (free-stubs - count new-left)
+;                        ask new-left [set free-stubs (free-stubs - 1)]
+;                        ]
+;                     ]
+;set free-turtles turtles with [free-stubs > 0]
+;]
+;print(" finished") 
+; ask links with [color = gray] [die]
+;end
+;
+;to-report turtles-to-the-right [k current-turtle]
+;let n [who] of current-turtle
+;let turtles-right nobody 
+;let candidate-turtle nobody 
+;let i 1 
+;while [not is-turtle-set? turtles-right]
+;[ 
+;set candidate-turtle turtle ((n + i) mod Num-Agents )
+;if [free-stubs] of candidate-turtle > 0 
+;[if candidate-turtle != current-turtle [set turtles-right (turtle-set turtles-right candidate-turtle)]]
+;
+;set candidate-turtle nobody
+;set i (i + 1)
+;]
+;while [count turtles-right < k ]
+;[
+;set candidate-turtle nobody
+;while [not is-turtle? candidate-turtle]
+;[ 
+;set candidate-turtle turtle ((n + i) mod Num-Agents )
+;if [free-stubs] of candidate-turtle > 0 
+;[if candidate-turtle != current-turtle [set turtles-right (turtle-set turtles-right candidate-turtle)]]
+;set i (i + 1)
+;]
+;] 
+;report turtles-right
+;end
+;
+;to-report turtles-to-the-left [k current-turtle]
+;let n [who] of current-turtle
+;let turtles-left nobody 
+;let candidate-turtle nobody 
+;let i 1 
+;while [not is-turtle-set? turtles-left]
+;[ 
+;set candidate-turtle turtle ((n - i) mod Num-Agents )
+;if [free-stubs] of candidate-turtle > 0 
+;[if candidate-turtle != current-turtle [set turtles-left (turtle-set turtles-left candidate-turtle)]]
+;set candidate-turtle nobody
+;set i (i + 1)
+;]
+;while [count turtles-left < k ]
+;[
+;set candidate-turtle nobody
+;while [not is-turtle? candidate-turtle]
+;[ 
+;set candidate-turtle turtle ((n - i) mod Num-Agents )
+;if [free-stubs] of candidate-turtle > 0 
+;[if candidate-turtle != current-turtle [set turtles-left (turtle-set turtles-left candidate-turtle)]]
+;set i (i + 1)
+;]
+;] 
+;report turtles-left
+;end
+;
+;
+;
+;to create-equivalent-random-network-with-same-degree
+;print("Creating an Equivalent Random Netowrk with Same Degree")
+; let current-turtle-1 nobody
+; let current-turtle-2 nobody
+; let candidate-turtle-1 nobody
+; let candidate-turtle-2 nobody
+; let swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
+; let rewire-count 0
+; let candidates-2 nobody  
+;while [ rewire-count < ( n-links * 10 )  ]
+; [
+;set current-turtle-1 nobody
+;set current-turtle-2 nobody
+;set candidate-turtle-1 nobody
+;set candidate-turtle-2 nobody
+;set swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
+; 
+; while [count swap-turtles < 4]
+; [
+; set current-turtle-1 one-of turtles
+; set candidate-turtle-1 one-of [link-neighbors] of current-turtle-1
+; set current-turtle-2 one-of turtles with [not member? self (turtle-set current-turtle-1 candidate-turtle-1 ([link-neighbors] of candidate-turtle-1))]
+; set candidates-2 turtles with [not member? self (turtle-set current-turtle-1 candidate-turtle-1 ([link-neighbors] of current-turtle-1 )) and member? self [link-neighbors] of current-turtle-2]
+; set candidate-turtle-2 one-of candidates-2
+; set swap-turtles (turtle-set current-turtle-1 current-turtle-2 candidate-turtle-1 candidate-turtle-2)
+; ]
+; 
+; ask link [who] of current-turtle-1 [who] of candidate-turtle-1 [die] 
+; ask link [who] of current-turtle-2 [who] of candidate-turtle-2 [die] 
+; ask current-turtle-1 [create-link-with candidate-turtle-2]
+; ask current-turtle-2 [create-link-with candidate-turtle-1]
+; set rewire-count (rewire-count + 1)
+;
+;]
+;print("finished") 
+;end
+;
+;;to create-equivalent-random-network
+;;;Create an equivalent random network
+;;create-Purples Num-Agents
+;;layout-circle turtles ( radius ) 
+;;set mean-path-length false
+;;set success? false
+;;set connected? false
+;;while[not connected?]
+;;[
+;;  ask links [die]
+;;  repeat n-links
+;;  [
+;;    ask one-of turtles [
+;;        ask one-of other turtles with [not link-neighbor? myself]
+;;        [create-link-with myself [set color violet]]
+;;                       ]
+;;  ]
+;;  set Purple-links links with [color = violet]
+;;  nw:set-context Purples Purple-links
+;;  set connected? true
+;;  set mean-path-length nw:mean-path-length
+;;  if not is-number? mean-path-length [set connected? false]
+;;]
+;;set equivalent-path-length mean-path-length
+;;ask Purples [set node-clustering-coefficient nw:clustering-coefficient]
+;;set equivalent-clustering-coefficient mean  [ node-clustering-coefficient ] of Purples
+;;set equivalent-clustering-coefficient-2      global-clustering-coefficient
+;;end
+
+to-report perception-in-satisfaction
+set perception ( count link-neighbors * ( mean [satisfaction2] of (turtle-set link-neighbors self)))
+end
+
+;global-perception perception-in-satisfaction / sum ([degree] of turtles)
 @#$#@#$#@
 GRAPHICS-WINDOW
 32
@@ -2138,7 +2152,7 @@ SLIDER
 *-inicoop
 0
 100
-60
+0
 1
 1
 NIL
@@ -2165,7 +2179,7 @@ INPUTBOX
 572
 293
 *-Num-Agents
-500
+5000
 1
 0
 Number
@@ -2188,7 +2202,7 @@ CHOOSER
 *-Topology
 *-Topology
 "Random" "Small-World" "Scale-Free" "Lattice"
-3
+0
 
 TEXTBOX
 388
@@ -2219,7 +2233,7 @@ SLIDER
 *-Rewiring-Probability
 0
 1
-1
+0.098
 .001
 1
 NIL
@@ -2279,7 +2293,7 @@ SLIDER
 *-Initial-Neighbours
 2
 *-Num-Agents - 1
-14
+10
 2
 1
 NIL
@@ -2663,9 +2677,9 @@ SWITCH
 MONITOR
 622
 170
-680
+672
 215
-New Turtles
+% New Turtles
 count turtles with [shape = \"target\"] * 100 / count turtles
 2
 1
@@ -2688,10 +2702,10 @@ SLIDER
 208
 *-cultural-constant
 *-cultural-constant
+.001
+20
 1
-50
-1
-1
+.001
 1
 NIL
 HORIZONTAL
