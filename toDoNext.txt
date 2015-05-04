@@ -1,13 +1,7 @@
 finish open mole connection to R do a first test (correct, add, improve, make faster, etc)
-measure sf for general ntwks (done) 
-test compilation time gain 
-add paragraph on report for bonacich and efficiency, etc. (new measures added yesterday) 
-define correct death distribution (check with david)
+update report on new centrality measures  
 add scale free with small world network construction? (This would be interesting to combine both properties, small world and scale free and see differences with simpler models) 
 add scale free efficient step
-
-
-*Measures: identify correct way of measuring the attractor in the presence of noise, or number of steps, etc. stop condition. For example, random network with high p, shows long periods of maxis and long periods of conformists in majority, but it keeps oscilating. How to measures this? (interval averages) 
 
 
 
@@ -24,7 +18,7 @@ Background Bibliography
 *Fco. Parra lima (Socio Cybernetics) 
 Nigel Gilbert (Computational Social Systems) 
 
- *Morin & Cilliers (Philosophy of Complexity) 
+*Morin & Cilliers (Philosophy of Complexity) 
 *Bruno Latour (Actor Network Theory) 
 *John Miller (Computational Economics) 
 *Scott Page (Political Science) 

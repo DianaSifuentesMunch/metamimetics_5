@@ -6,29 +6,32 @@ val connectionProbability = Val[Double]
 val initialNeighbours = Val[Double]
 val rewiringProbability = Val[Double]
 val scaleFreeExponent = Val[Double]
-val initialRandomTypes = Val[Double]
+val initialRandomTypes = Val[Boolean]
 val initialMaxi = Val[Double]
 val initialMini = Val[Double]
 val initialConf = Val[Double]
 val strengthOfDilemma = Val[Double]
 val inicoop = Val[Double]
-val replacement = Val[Double]
+val replacement = Val[Boolean]
 val culturalConstant = Val[Double]
 val loadtopology = Val[Boolean]
 val seed = Val[Int]
 val maxi = Val[Double]
+val image = Val[File]
 
 
 val exploration = 
   ExplorationTask(
-    (rewiringProbability in (0.0 to 1.0 by 0.20)) x
+    (rewiringProbability in (0.0 to 1.0 by 0.25)) x
     (inicoop in (0.0 to 100.0 by 25.0)) x
-    (seed in (UniformDistribution[Int]() take 1))
+    (seed in (UniformDistribution[Int]() take 100)) take 5
   ) 
 
 val cmds = List(
   "random-seed ${seed}",
-  "run-to-grid 10")
+  "run-to-grid 200",
+  "export-graph"
+)
   
 val basePath = "/iscpif/users/sifuentes/metamimetic/"
 
@@ -38,16 +41,16 @@ val model =
     fileName := "file",
     topology := "Small-World",
     numAgents := 100.0,
-    connectionProbability := 0.0,
-    initialNeighbours := 6,
+    connectionProbability := 0.5,
+    initialNeighbours := 8,
     scaleFreeExponent := 2,
-    initialRandomTypes := 1,
+    initialRandomTypes := true,
     initialMaxi := 0,
     initialMini := 0,
     initialConf := 0,
     strengthOfDilemma := 0.5,
     inicoop := 50.0,
-    replacement := 0.0,
+    replacement := false,
     culturalConstant := 5.0,
     loadtopology := false,
     netLogoInputs += (fileName, "file.name"),
@@ -66,12 +69,14 @@ val model =
     netLogoInputs += (replacement, "replacement?"),
     netLogoInputs += (culturalConstant, "cultural-constant"),
     netLogoInputs += (loadtopology, "Load-Topology?"),    
-    netLogoOutputs += ("maxi", maxi)
-
+    netLogoOutputs += ("maxi", maxi),
+    outputFiles += ("graph.graphml", image),
+    outputs += (rewiringProbability, inicoop, seed)
   )
+
   
 val csvHook = AppendToCSVFileHook(basePath + "output/result.csv")
-
+val fileHook = CopyFileHook(image, basePath + "output/graph_${rewiringProbability}_${inicoop}_${seed}.ml" )
 val env = EGIEnvironment("vo.complex-systems.eu")
 
-val ex = exploration -< (model hook csvHook on env by 5) start
+val ex = exploration -< (model hook csvHook hook fileHook) start
