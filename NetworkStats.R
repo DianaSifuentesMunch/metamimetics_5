@@ -20,6 +20,20 @@ degrees<-degree(g)
 degreesNormal<-degree(g,normalized=TRUE)
 NumAgents<-vcount(g)
 eigen<-centralization.evcent (g)
+run.info<-unlist(strsplit(V(g)$RUN.INFO[1],"*",fixed=TRUE))
+topology<-run.info[1]
+dilemma<-run.info[2]
+inicoop<-run.info[3]
+replacement<-run.info[4]
+cultural.constant<-run.info[5]
+rewiring.prob<-run.info[6]
+init.neighbors<-run.info[7]
+connection.prob<-run.info[8]
+sf.exponent<-run.info[9]
+random.init<-run.info[10]
+load.topo<-run.info[11]
+num.agents<-run.info[12]
+
 
 
 # adapted from http://www.shizukalab.com/toolkits/sna/node-level-calculations
@@ -55,7 +69,7 @@ anti<-length(ind4)*100/NumAgents
 
 #age 
 ages<-mean(V(g)$AGE)
-SDages<-SD(V(g)$AGE)
+SDages<-sd(V(g)$AGE)
 ageMaxi<-mean(ages[ind1])
 ageMini<-mean(ages[ind2]) 
 ageConf<-mean(ages[ind3])  

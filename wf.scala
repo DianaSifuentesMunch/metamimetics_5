@@ -17,7 +17,9 @@ val culturalConstant = Val[Double]
 val loadtopology = Val[Boolean]
 val seed = Val[Int]
 val maxi = Val[Double]
-val image = Val[File]
+val graph = Val[File]
+val coop = Val[File]
+val popul = Val[File]
 
 
 val exploration = 
@@ -30,13 +32,15 @@ val exploration =
 val cmds = List(
   "random-seed ${seed}",
   "run-to-grid 200",
-  "export-graph"
+  "export-graph",
+  "export-coop",
+  "export-prop"
 )
   
-val basePath = "/iscpif/users/sifuentes/metamimetic/"
+val basePath = "/iscpif/users/sifuentes/"
 
 val model = 
-  NetLogo5Task(basePath + "model/OM_Metamimetic_Networks.nlogo", cmds, true) set (
+  NetLogo5Task(basePath + "metamimetics_5/model/OM_Metamimetic_Networks.nlogo", cmds, true) set (
     inputs += seed,
     fileName := "file",
     topology := "Small-World",
@@ -70,13 +74,23 @@ val model =
     netLogoInputs += (culturalConstant, "cultural-constant"),
     netLogoInputs += (loadtopology, "Load-Topology?"),    
     netLogoOutputs += ("maxi", maxi),
-    outputFiles += ("graph.graphml", image),
+    outputFiles += ("graph.graphml", graph),
+    outputFiles += ("popul.csv", popul),
+    outputFiles += ("coop.csv", coop),
+
     outputs += (rewiringProbability, inicoop, seed)
   )
 
   
 val csvHook = AppendToCSVFileHook(basePath + "output/result.csv")
-val fileHook = CopyFileHook(image, basePath + "output/graph_${rewiringProbability}_${inicoop}_${seed}.ml" )
+
+val fileHook = CopyFileHook(graph, basePath + "output/graph_${rewiringProbability}_${inicoop}_${seed}.ml" )
+
+val populHook = CopyFileHook(popul, basePath + "output/popul_${rewiringProbability}_${inicoop}_${seed}.csv" )
+
+val coopHook = CopyFileHook(coop, basePath + "output/coop_${rewiringProbability}_${inicoop}_${seed}.csv" )
+
+
 val env = EGIEnvironment("vo.complex-systems.eu")
 
-val ex = exploration -< (model hook csvHook hook fileHook) start
+val ex = exploration -< (model hook   csvHook hook ( fileHook , populHook , coopHook)) start
