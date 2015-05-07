@@ -117,7 +117,6 @@ age.at.death.list
 ;  copy-error-rule
 ;  copy-error-behavior
  
-
 run.info 
 ]
 
@@ -1415,7 +1414,7 @@ to my-update-plots
   plot satisfaction-rate2
 ;  set-current-plot-pen "Happy and Cooperating"
 ;  plot count turtles with [shape = "face happy" and cooperate] / Num-Agents
-;  
+ 
  
   set-current-plot "Population"
   set-current-plot-pen "Maxi"
@@ -1430,13 +1429,13 @@ to my-update-plots
 
   set-current-plot "Age Plot"
   set-current-plot-pen "maxi"
-  ifelse maxi > 0 [plot mean [age] of turtles with [ my.rule  = 1 ]][plot 0]
+  ifelse maxi > 0 [plot mean [age] of turtles with [ my.rule  = 1 and age > 15]][plot 0]
   set-current-plot-pen "mini"
-  ifelse mini > 0 [plot mean [age] of turtles with [ my.rule  = 2 ]][plot 0]
+  ifelse mini > 0 [plot mean [age] of turtles with [ my.rule  = 2 and age > 15]][plot 0]
   set-current-plot-pen "conf"
-  ifelse conf > 0 [plot mean [age] of turtles with [ my.rule  = 3 ]][plot 0]
+  ifelse conf > 0 [plot mean [age] of turtles with [ my.rule  = 3 and age > 15]][plot 0]
   set-current-plot-pen "anti"
-  ifelse anti > 0 [plot mean [age] of turtles with [ my.rule  = 4 ]][plot 0]
+  ifelse anti > 0 [plot mean [age] of turtles with [ my.rule  = 4 and age > 15]][plot 0]
   set-current-plot-pen "all"
   plot mean [age] of turtles
  
@@ -1834,11 +1833,10 @@ end
 ;to-report sat-perception
 ;ask turtles [
 ;            let tset ( turtle-set link-neighbors self)
-;            set countn count tset
-;            set sperception ( countn )  * mean [satisfaction2] of tset
+;            set sperception mean [satisfaction2] of tset
 ;            ]
 ;
-;report sum [sperception] of turtles / sum [countn] of turtles 
+;report mean [sperception] of turtles  
 ;end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -1921,7 +1919,7 @@ SLIDER
 *-strength-of-dilemma
 0
 0.5
-0.5
+0.33
 0.01
 1
 NIL
@@ -1945,7 +1943,6 @@ true
 PENS
 "Cooperation" 1.0 0 -2674135 true "" ""
 "Satisfaction" 1.0 0 -13345367 true "" ""
-"perception" 1.0 0 -7500403 true "" ""
 
 PLOT
 807
@@ -2004,7 +2001,7 @@ INPUTBOX
 572
 293
 *-Num-Agents
-50
+500
 1
 0
 Number
@@ -2027,7 +2024,7 @@ CHOOSER
 *-Topology
 *-Topology
 "Random" "Small-World" "Scale-Free" "Lattice"
-1
+3
 
 TEXTBOX
 388
@@ -2422,8 +2419,8 @@ Count
 Age
 0.0
 500.0
-0.0
-50.0
+45.0
+70.0
 true
 true
 "" ""
@@ -2530,7 +2527,7 @@ SLIDER
 *-cultural-constant
 .001
 20
-2.782
+20
 .001
 1
 NIL

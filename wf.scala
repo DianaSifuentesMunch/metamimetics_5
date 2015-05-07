@@ -24,14 +24,15 @@ val popul = Val[File]
 
 val exploration = 
   ExplorationTask(
-    (rewiringProbability in (0.0 to 1.0 by 0.25)) x
-    (inicoop in (0.0 to 100.0 by 25.0)) x
+    (rewiringProbability in (0.0 to 1.0 by 0.01)) x
+    (inicoop in (0.0 to 100.0 by 0.05)) x
+    (strengthOfDilemma in (0.0 to 0.5 by 0.05)) x  
     (seed in (UniformDistribution[Int]() take 100)) take 5
   ) 
 
 val cmds = List(
   "random-seed ${seed}",
-  "run-to-grid 200",
+  "run-to-grid 50",
   "export-graph",
   "export-coop",
   "export-prop"
@@ -40,11 +41,11 @@ val cmds = List(
 val basePath = "/iscpif/users/sifuentes/"
 
 val model = 
-  NetLogo5Task(basePath + "metamimetics_5/model/OM_Metamimetic_Networks.nlogo", cmds, true) set (
+  NetLogo5Task(basePath + "metamimetic/model/OM_Metamimetic_Networks.nlogo", cmds, true) set (
     inputs += seed,
     fileName := "file",
     topology := "Small-World",
-    numAgents := 100.0,
+    numAgents := 500.0,
     connectionProbability := 0.5,
     initialNeighbours := 8,
     scaleFreeExponent := 2,
@@ -52,10 +53,8 @@ val model =
     initialMaxi := 0,
     initialMini := 0,
     initialConf := 0,
-    strengthOfDilemma := 0.5,
-    inicoop := 50.0,
-    replacement := false,
-    culturalConstant := 5.0,
+    replacement := true,
+    culturalConstant := 1.0,
     loadtopology := false,
     netLogoInputs += (fileName, "file.name"),
     netLogoInputs += (topology, "Topology"),
@@ -78,19 +77,19 @@ val model =
     outputFiles += ("popul.csv", popul),
     outputFiles += ("coop.csv", coop),
 
-    outputs += (rewiringProbability, inicoop, seed)
+    outputs += (rewiringProbability, inicoop, seed, strengthOfDilemma)
   )
 
   
-val csvHook = AppendToCSVFileHook(basePath + "output/result.csv")
+val csvHook = AppendToCSVFileHook(basePath + "output/result/result.csv")
 
-val fileHook = CopyFileHook(graph, basePath + "output/graph_${rewiringProbability}_${inicoop}_${seed}.ml" )
+val fileHook = CopyFileHook(graph, basePath + "output/graphs/graph_${rewiringProbability}_${inicoop}_${seed}_${strengthOfDilemma}.graphml" )
 
-val populHook = CopyFileHook(popul, basePath + "output/popul_${rewiringProbability}_${inicoop}_${seed}.csv" )
+val populHook = CopyFileHook(popul, basePath + "output/plots/popul_${rewiringProbability}_${inicoop}_${seed}_${strengthOfDilemma}.csv" )
 
-val coopHook = CopyFileHook(coop, basePath + "output/coop_${rewiringProbability}_${inicoop}_${seed}.csv" )
+val coopHook = CopyFileHook(coop, basePath + "output/plots/coop_${rewiringProbability}_${inicoop}_${seed}_${strengthOfDilemma}.csv" )
 
 
 val env = EGIEnvironment("vo.complex-systems.eu")
 
-val ex = exploration -< (model hook   csvHook hook ( fileHook , populHook , coopHook)) start
+val ex = exploration -< (model   hook ( csvHook , fileHook , populHook , coopHook) ) start

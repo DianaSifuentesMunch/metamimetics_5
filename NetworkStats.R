@@ -1,12 +1,9 @@
-#! /Library/Frameworks/R.framework/Versions/3.1/Resources/bin/Rscript
 
 
-rm(list=ls(all=TRUE))
-
-library(igraph)
-g<-read.graph("graph.graphml" , format="graphml")
-
-
+igraphFunctions<-function(g,filename)
+{
+#load("/Users/Diana/Documents/StageData/R/reachFunctions.rdata")
+#library(igraph)
 #previous steps
 ind1<-which(V(g)$MY.RULE==1)
 ind2<-which(V(g)$MY.RULE==2)
@@ -20,45 +17,23 @@ degrees<-degree(g)
 degreesNormal<-degree(g,normalized=TRUE)
 NumAgents<-vcount(g)
 eigen<-centralization.evcent (g)
+
 run.info<-unlist(strsplit(V(g)$RUN.INFO[1],"*",fixed=TRUE))
-topology<-run.info[1]
-dilemma<-run.info[2]
-inicoop<-run.info[3]
-replacement<-run.info[4]
-cultural.constant<-run.info[5]
-rewiring.prob<-run.info[6]
-init.neighbors<-run.info[7]
-connection.prob<-run.info[8]
-sf.exponent<-run.info[9]
+dilemma<-as.numeric(run.info[2])
+inicoop<-as.numeric(run.info[3])
+
+cultural.constant<-as.numeric(run.info[5])
+rewiring.prob<-as.numeric(run.info[6])
+init.neighbors<-as.numeric(run.info[7])
+connection.prob<-as.numeric(run.info[8])
+sf.exponent<-as.numeric(run.info[9])
+num.agents<-as.numeric(run.info[12])
+
 random.init<-run.info[10]
 load.topo<-run.info[11]
-num.agents<-run.info[12]
-
-
-
-# adapted from http://www.shizukalab.com/toolkits/sna/node-level-calculations
-reach2=function(x){
-  r=vcount(x)
-  n=neighborhood(x,2)
-  l=unlist(lapply(n,function(x) length(x)/r))
-}
-
-# adapted from http://www.shizukalab.com/toolkits/sna/node-level-calculations
-reach3=function(x){
-  r=vcount(x)
-  n=neighborhood(x,3)
-  l=unlist(lapply(n,function(x) length(x)/r))
-  }
-  
-
-# from http://www.shizukalab.com/toolkits/sna/node-level-calculations
-dwreach=function(x){
-  distances=shortest.paths(x) #create matrix of geodesic distances
-  diag(distances)=1 # replace the diagonal with 1s
-  weights=1/distances # take the reciprocal of distances
-  apply(weights,1,sum) # sum for each node (row)
-}
-
+replacement<-run.info[4]
+topology<-run.info[1]
+runInfo<-paste(random.init,load.topo,replacement,topology,sep=".")
 
 #LOCAL
 #proportions
@@ -68,7 +43,8 @@ conf<-length(ind3)*100/NumAgents
 anti<-length(ind4)*100/NumAgents
 
 #age 
-ages<-mean(V(g)$AGE)
+ages<-V(g)$AGE
+meanages<-mean(V(g)$AGE)
 SDages<-sd(V(g)$AGE)
 ageMaxi<-mean(ages[ind1])
 ageMini<-mean(ages[ind2]) 
@@ -367,126 +343,87 @@ assortCoop<-assortativity(g,V(g)$COOPERATE,directed=FALSE)
 assortRule<-assortativity(g,V(g)$MY.RULE,directed=FALSE)
 assortNomRule<-assortativity.nominal(g,V(g)$MY.RULE,directed=FALSE)
 
-
-
-library(sna)
-y<-get.adjacency(g)
-
-#another centrality 
-Acentral<-graphcent(as.matrix(y))
-AcentralMaxi<-mean(Acentral[ind1]) 
-AcentralMini<-mean(Acentral[ind2]) 
-AcentralConf<-mean(Acentral[ind3]) 
-AcentralAnti<-mean(Acentral[ind4]) 
-
-#load
-load<-loadcent(as.matrix(y))
-loadMaxi<-mean(load[ind1]) 
-loadMini<-mean(load[ind2]) 
-loadConf<-mean(load[ind3]) 
-loadAnti<-mean(load[ind4]) 
-
-#prestige
-prestige<-prestige(as.matrix(y))
-prestigeMaxi<-mean(prestige[ind1]) 
-prestigeMini<-mean(prestige[ind2]) 
-prestigeConf<-mean(prestige[ind3]) 
-prestigeAnti<-mean(prestige[ind4]) 
-
-
-#stress 
-stress<-stresscent(as.matrix(y))
-stressMaxi<-mean(stress[ind1]) 
-stressMini<-mean(stress[ind2]) 
-stressConf<-mean(stress[ind3]) 
-stressAnti<-mean(stress[ind4]) 
-
-
-#information
-information<-infocent(as.matrix(y))
-informationMaxi<-mean(information[ind1]) 
-informationMini<-mean(information[ind2]) 
-informationConf<-mean(information[ind3]) 
-informationAnti<-mean(information[ind4]) 
-
-library(qgraph)
-smallworld<-smallworldness(g)
-smallworld<-smallworld[1]
-
-
-
 ###in case of renovation of population
 
 if ( max(V(g)$CHANCES.IMITATIONS) > 0) 
 {
   #age at death 
-deathage<-V(g)$AGE.AT.DEATH.LIST
-deathage<-lapply(deathage,function(x) gsub("[","",x,fixed=TRUE))
-deathage<-lapply(deathage,function(x) gsub("]","",x,fixed=TRUE))
-deathage<-unlist(lapply(deathage,function(x) as.numeric(unlist(strsplit(x, " ", fixed=TRUE)))))
-#n.changes list 
-nchangeslist<-V(g)$N.CHANGES.LIST
-nchangeslist<-lapply(nchangeslist,function(x) gsub("[","",x,fixed=TRUE))
-nchangeslist<-lapply(nchangeslist,function(x) gsub("]","",x,fixed=TRUE))
-nchangeslist<-unlist(lapply(nchangeslist,function(x) as.numeric(unlist(strsplit(x, " ", fixed=TRUE)))))
-#rule at death list 
-deathrulelist<-V(g)$RULE.AT.DEATH.LIST
-deathrulelist<-lapply(deathrulelist,function(x) gsub("[","",x,fixed=TRUE))
-deathrulelist<-lapply(deathrulelist,function(x) gsub("]","",x,fixed=TRUE))
-deathrulelist<-unlist(lapply(deathrulelist,function(x) as.numeric(unlist(strsplit(x, " ", fixed=TRUE)))))
-#time.behavior list 
-timebehaviorlist<-V(g)$TIME.BEHAVIOR.LIST
-timebehaviorlist<-lapply(timebehaviorlist,function(x) gsub("[","",x,fixed=TRUE))
-timebehaviorlist<-lapply(timebehaviorlist,function(x) gsub("]","",x,fixed=TRUE))
-timebehaviorlist<-unlist(lapply(timebehaviorlist,function(x) as.numeric(unlist(strsplit(x, " ", fixed=TRUE)))))
-#time.rule list 
-timerulelist<-V(g)$TIME.RULE.LIST
-timerulelist<-lapply(timerulelist,function(x) gsub("[","",x,fixed=TRUE))
-timerulelist<-lapply(timerulelist,function(x) gsub("]","",x,fixed=TRUE))
-timerulelist<-unlist(lapply(timerulelist,function(x) as.numeric(unlist(strsplit(x, " ", fixed=TRUE)))))
-ind1<-which(deathrulelist==1)
-ind2<-which(deathrulelist==2)
-ind3<-which(deathrulelist==3)
-ind4<-which(deathrulelist==4)
-deathageMaxi<-mean(deathage[ind1])
-deathageMini<-mean(deathage[ind2])
-deathageConf<-mean(deathage[ind3])
-deathageAnti<-mean(deathage[ind4])
-nchangesMaxi<-mean(nchangeslist[ind1])
-nchangesMini<-mean(nchangeslist[ind2])
-nchangesConf<-mean(nchangeslist[ind3])
-nchangesAnti<-mean(nchangeslist[ind4])
-timebehaviorlMaxi<-mean(timebehaviorlist[ind1])
-timebehaviorlMini<-mean(timebehaviorlist[ind2])
-timebehaviorlConf<-mean(timebehaviorlist[ind3])
-timebehaviorlAnti<-mean(timebehaviorlist[ind4])
-timerulelMaxi<-mean(timerulelist[ind1])
-timerulelMini<-mean(timerulelist[ind2])
-timerulelConf<-mean(timerulelist[ind3])
-timerulelAnti<-mean(timerulelist[ind4])
-SDdeathageMaxi<-sd(deathage[ind1])
-SDdeathageMini<-sd(deathage[ind2])
-SDdeathageConf<-sd(deathage[ind3])
-SDdeathageAnti<-sd(deathage[ind4])
-SDnchangesMaxi<-sd(nchangeslist[ind1])
-SDnchangesMini<-sd(nchangeslist[ind2])
-SDnchangesConf<-sd(nchangeslist[ind3])
-SDnchangesAnti<-sd(nchangeslist[ind4])
-SDtimebehaviorlMaxi<-sd(timebehaviorlist[ind1])
-SDtimebehaviorlMini<-sd(timebehaviorlist[ind2])
-SDtimebehaviorlConf<-sd(timebehaviorlist[ind3])
-SDtimebehaviorlAnti<-sd(timebehaviorlist[ind4])
-SDtimerulelMaxi<-sd(timerulelist[ind1])
-SDtimerulelMini<-sd(timerulelist[ind2])
-SDtimerulelConf<-sd(timerulelist[ind3])
-SDtimerulelAnti<-sd(timerulelist[ind4])
+  deathage<-V(g)$AGE.AT.DEATH.LIST
+  deathage<-lapply(deathage,function(x) gsub("[","",x,fixed=TRUE))
+  deathage<-lapply(deathage,function(x) gsub("]","",x,fixed=TRUE))
+  deathage<-unlist(lapply(deathage,function(x) as.numeric(unlist(strsplit(x, " ", fixed=TRUE)))))
+  #n.changes list 
+  nchangeslist<-V(g)$N.CHANGES.LIST
+  nchangeslist<-lapply(nchangeslist,function(x) gsub("[","",x,fixed=TRUE))
+  nchangeslist<-lapply(nchangeslist,function(x) gsub("]","",x,fixed=TRUE))
+  nchangeslist<-unlist(lapply(nchangeslist,function(x) as.numeric(unlist(strsplit(x, " ", fixed=TRUE)))))
+  #rule at death list 
+  deathrulelist<-V(g)$RULE.AT.DEATH.LIST
+  deathrulelist<-lapply(deathrulelist,function(x) gsub("[","",x,fixed=TRUE))
+  deathrulelist<-lapply(deathrulelist,function(x) gsub("]","",x,fixed=TRUE))
+  deathrulelist<-unlist(lapply(deathrulelist,function(x) as.numeric(unlist(strsplit(x, " ", fixed=TRUE)))))
+  
+  
+  #time.behavior list 
+  timebehaviorlist<-V(g)$TIME.BEHAVIOR.LIST
+  timebehaviorlist<-lapply(timebehaviorlist,function(x) gsub("[","",x,fixed=TRUE))
+  timebehaviorlist<-lapply(timebehaviorlist,function(x) gsub("]","",x,fixed=TRUE))
+  timebehaviorlist<-unlist(lapply(timebehaviorlist,function(x) as.numeric(unlist(strsplit(x, " ", fixed=TRUE)))))
+  
+  #time.rule list 
+  timerulelist<-V(g)$TIME.RULE.LIST
+  timerulelist<-lapply(timerulelist,function(x) gsub("[","",x,fixed=TRUE))
+  timerulelist<-lapply(timerulelist,function(x) gsub("]","",x,fixed=TRUE))
+  timerulelist<-unlist(lapply(timerulelist,function(x) as.numeric(unlist(strsplit(x, " ", fixed=TRUE)))))
+  ind1<-which(deathrulelist==1)
+  ind2<-which(deathrulelist==2)
+  ind3<-which(deathrulelist==3)
+  ind4<-which(deathrulelist==4)
+  deathageMaxi<-mean(deathage[ind1])
+  deathageMini<-mean(deathage[ind2])
+  deathageConf<-mean(deathage[ind3])
+  deathageAnti<-mean(deathage[ind4])
+  nchangesMaxi<-mean(nchangeslist[ind1])
+  nchangesMini<-mean(nchangeslist[ind2])
+  nchangesConf<-mean(nchangeslist[ind3])
+  nchangesAnti<-mean(nchangeslist[ind4])
+  timebehaviorlMaxi<-mean(timebehaviorlist[ind1])
+  timebehaviorlMini<-mean(timebehaviorlist[ind2])
+  timebehaviorlConf<-mean(timebehaviorlist[ind3])
+  timebehaviorlAnti<-mean(timebehaviorlist[ind4])
+  timerulelMaxi<-mean(timerulelist[ind1])
+  timerulelMini<-mean(timerulelist[ind2])
+  timerulelConf<-mean(timerulelist[ind3])
+  timerulelAnti<-mean(timerulelist[ind4])
+  SDdeathageMaxi<-sd(deathage[ind1])
+  SDdeathageMini<-sd(deathage[ind2])
+  SDdeathageConf<-sd(deathage[ind3])
+  SDdeathageAnti<-sd(deathage[ind4])
+  SDnchangesMaxi<-sd(nchangeslist[ind1])
+  SDnchangesMini<-sd(nchangeslist[ind2])
+  SDnchangesConf<-sd(nchangeslist[ind3])
+  SDnchangesAnti<-sd(nchangeslist[ind4])
+  SDtimebehaviorlMaxi<-sd(timebehaviorlist[ind1])
+  SDtimebehaviorlMini<-sd(timebehaviorlist[ind2])
+  SDtimebehaviorlConf<-sd(timebehaviorlist[ind3])
+  SDtimebehaviorlAnti<-sd(timebehaviorlist[ind4])
+  SDtimerulelMaxi<-sd(timerulelist[ind1])
+  SDtimerulelMini<-sd(timerulelist[ind2])
+  SDtimerulelConf<-sd(timerulelist[ind3])
+  SDtimerulelAnti<-sd(timerulelist[ind4])
 }
+
+
+
+
+
+
 
 
 ###SHUFFLING
 #suffling and retake measures (after looking at interesting measures)
 V(g)$MY.RULE<-sample.int(4,NumAgents,replace=TRUE)
-write.graph(g,"graph2.graphml",format="graphml")
+write.graph(g,paste(filename,"Shuffled", ".graphml",sep=""),format="graphml")
 
 
 
@@ -501,12 +438,111 @@ for(i in 3:length(lista))
 {
   data<-cbind(data,get(lista[i]))  
 }
+data<-cbind(data,runInfo)
 data<-as.data.frame(data)
-names(data)<-lista
-write.csv(data,file="data.csv")
+names(data)<-c(lista,"runInfo")
+
+#tab<-read.table("/Users/Diana/Documents/StageData/R/outputs/dataFrames/dataIgraph.csv")
+#tab<-rbind(tab,data)
+write.csv(data,file=paste(filename,"dataIgraph.csv",sep=""))
+}
 
 
 
+
+
+SnaFunctions<-function(g,filename,y,ind1,ind2,ind3,ind4)
+{  
+#  library(sna)
+#  library(qgraph)
+  
+  #another centrality 
+  Acentral<-graphcent(as.matrix(y))
+  AcentralMaxi<-mean(Acentral[ind1]) 
+  AcentralMini<-mean(Acentral[ind2]) 
+  AcentralConf<-mean(Acentral[ind3]) 
+  AcentralAnti<-mean(Acentral[ind4]) 
+  
+  #load
+  load<-loadcent(as.matrix(y))
+  loadMaxi<-mean(load[ind1]) 
+  loadMini<-mean(load[ind2]) 
+  loadConf<-mean(load[ind3]) 
+  loadAnti<-mean(load[ind4]) 
+  
+  #prestige
+  prestige<-prestige(as.matrix(y))
+  prestigeMaxi<-mean(prestige[ind1]) 
+  prestigeMini<-mean(prestige[ind2]) 
+  prestigeConf<-mean(prestige[ind3]) 
+  prestigeAnti<-mean(prestige[ind4]) 
+  
+  
+  #stress 
+  stress<-stresscent(as.matrix(y))
+  stressMaxi<-mean(stress[ind1]) 
+  stressMini<-mean(stress[ind2]) 
+  stressConf<-mean(stress[ind3]) 
+  stressAnti<-mean(stress[ind4]) 
+  
+  
+  #information
+  information<-infocent(as.matrix(y))
+  informationMaxi<-mean(information[ind1]) 
+  informationMini<-mean(information[ind2]) 
+  informationConf<-mean(information[ind3]) 
+  informationAnti<-mean(information[ind4]) 
+  
+  
+  
+  smallworld<-smallworldness(g)
+  smallworld<-smallworld[1]
+  
+  
+  
+  ###create data.frame
+  lista<-ls()
+  index1<-which(unlist(lapply(lista,function(x) length(get(x))))==1)
+  index2<-which(unlist(lapply(lista,function(x) class(get(x))))=="numeric")
+  lista<-lista[intersect(index1,index2)]
+  data<-cbind(get(lista[1]),get(lista[2]))
+  for(i in 3:length(lista))
+  {
+    data<-cbind(data,get(lista[i]))  
+  }
+  data<-as.data.frame(data)
+  names(data)<-lista
+  
+#  tab<-read.table("/Users/Diana/Documents/StageData/R/outputs/dataFrames/dataSna.csv")
+#  tab<-rbind(tab,data)
+write.csv(data,file=paste(filename,"dataSNA.csv",sep=""))
+
+}
+
+
+
+# adapted from http://www.shizukalab.com/toolkits/sna/node-level-calculations
+reach2=function(x){
+  r=vcount(x)
+  n=neighborhood(x,2)
+  l=unlist(lapply(n,function(x) length(x)/r))
+}
+
+# adapted from http://www.shizukalab.com/toolkits/sna/node-level-calculations
+reach3=function(x){
+  r=vcount(x)
+  n=neighborhood(x,3)
+  l=unlist(lapply(n,function(x) length(x)/r))
+}
+
+
+# from http://www.shizukalab.com/toolkits/sna/node-level-calculations
+dwreach=function(x){
+  distances=shortest.paths(x) #create matrix of geodesic distances
+  diag(distances)=1 # replace the diagonal with 1s
+  weights=1/distances # take the reciprocal of distances
+  apply(weights,1,sum) # sum for each node (row)
+}
 
 
 #########################################
@@ -537,4 +573,32 @@ write.csv(data,file="data.csv")
 #communities
 #modified versions of betweeness and clustering for flow of energy acc to fleischer and brenes although flow betweenness takes forever tocompute on 100 nodes.. flowbet(as.matrix(y))
 
+
+createStats<-function(graphs,graphs2)
+{
+  for( i in 1:length(graphs))
+  {
+    library(igraph)
+    g<-read.graph(graphs[i] , format="graphml")
+    igraphFunctions(g,graphs2[i])
+    y<-get.adjacency(g)
+    ind1<-which(V(g)$MY.RULE==1)
+    ind2<-which(V(g)$MY.RULE==2)
+    ind3<-which(V(g)$MY.RULE==3)
+    ind4<-which(V(g)$MY.RULE==4)
+    
+    detach(package:igraph)
+    library(sna)
+    library(qgraph)
+    SnaFunctions(g,graphs2[i],y,ind1,ind2,ind3,ind4)
+    detach(package:sna)
+    detach(package:qgraph)
+  }
+}
+
+
+save(createStats,file="createStats.rdata")
+save(SnaFunctions,file="SnaFunctions.rdata")
+save(igraphFunctions,file="igraphFunctions.rdata")
+save(dwreach, reach2, reach3, file="reachFunctions.rdata")
 
