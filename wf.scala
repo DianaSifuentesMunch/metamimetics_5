@@ -20,7 +20,7 @@ val maxi = Val[Double]
 val graph = Val[File]
 val coop = Val[File]
 val popul = Val[File]
-
+val ages = Val[File]
 
 val exploration = 
   ExplorationTask(
@@ -35,7 +35,8 @@ val cmds = List(
   "run-to-grid 50",
   "export-graph",
   "export-coop",
-  "export-prop"
+  "export-prop",
+  "export-ages"
 )
   
 val basePath = "/iscpif/users/sifuentes/"
@@ -76,6 +77,7 @@ val model =
     outputFiles += ("graph.graphml", graph),
     outputFiles += ("popul.csv", popul),
     outputFiles += ("coop.csv", coop),
+    outputFiles += ("ages.csv", ages),
 
     outputs += (rewiringProbability, inicoop, seed, strengthOfDilemma)
   )
@@ -89,7 +91,8 @@ val populHook = CopyFileHook(popul, basePath + "output/plots/popul_${rewiringPro
 
 val coopHook = CopyFileHook(coop, basePath + "output/plots/coop_${rewiringProbability}_${inicoop}_${seed}_${strengthOfDilemma}.csv" )
 
+val agesHook = CopyFileHook(ages, basePath + "output/plots/ages_${rewiringProbability}_${inicoop}_${seed}_${strengthOfDilemma}.csv" )
 
 val env = EGIEnvironment("vo.complex-systems.eu")
 
-val ex = exploration -< (model   hook ( csvHook , fileHook , populHook , coopHook) ) start
+val ex = exploration -< (model   hook ( csvHook , fileHook , populHook , coopHook, agesHook) ) start

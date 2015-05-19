@@ -194,6 +194,8 @@ set radius ( ( min (list world-width world-height) ) / 2 - 1)
 common-setup
 ;set-outputs
 ;my-update-plots
+; ask links [set color gray]
+
 end
 
 
@@ -314,6 +316,12 @@ set rule.at.death.list []
 set time.behavior.list []
 set age.at.death.list  []
 set run.info (word Topology  "*" Strength-of-Dilemma "*" inicoop "*" replacement? "*" cultural-constant "*" Rewiring-Probability "*" Initial-Neighbours "*" Connection-Probability "*" Scale-Free-Exponent "*" Initial-Random-Types? "*" load-topology? "*" Num-Agents )
+
+;set betweenness-centrality nw:betweenness-centrality
+;set eigenvector-centrality nw:eigenvector-centrality
+;set page-rank nw:page-rank
+;set closeness-centrality nw:closeness-centrality
+;set node-clustering-coefficient nw:clustering-coefficient 
 ]
 end
 
@@ -612,10 +620,13 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;census-dist : fractions of people with age 0, 5, ...100
-;life-expect   : expected life expectancy at ages 0, 5, ...100 (life expectancy = 1/M_age)
+;life-expect   : expected life at ages 0, 5, ...100 (life expectancy = 1/M_age)
+
 ;expected rate at which people die per unit time at each age* = M_age* 
 ;probability of dying at age* = 1-exp(-M_age*) :: 
+
 ;F_age*= fraction of population of age* that dies within one year :: M_age*=-ln(1-F_age*)
+
 ;if M is done in intervals (as we have here), M is the value at age A+5
 
 
@@ -632,7 +643,7 @@ to init-age-USA2010 ;;Population fraction for ages according data colected
           [
           set index floor random 21
           ]
-    set age  ( (index) * 5  + random 5)
+    set age   ( (index) * 5 + random 5)
               ]
 end
 
@@ -645,16 +656,16 @@ to set-life-distribution-USA2010 ;;Life expectation for ages according data cole
 
 set life-expectation (list 78.7 74.3 69.3 64.4 59.5 54.8 50.0 45.3 40.6 36.0 31.5 27.2 23.1 19.2 15.5 12.2 9.2 6.6 4.7 3.3 2.4) 
 set mortality-rate map [1 / ?] life-expectation
-set prob-to-die map [ 1 - exp ( ( - 1 ) * ? )  ] mortality-rate 
-set prob-die-imitation map [( 1 - exp (  (ln ( 1 - ? )) / cultural-constant )) ] prob-to-die
+set prob-to-die map [ (1 - exp ( ( - 1 ) * ? )  )] mortality-rate 
+set prob-die-imitation map [( 1 - exp (  ( ln ( 1 - ? )) / cultural-constant )) ] prob-to-die
 end
 
 to-report prob-die
-let index ceiling ( ceiling ( age )  / 5 ) - 1 
+let index ceiling ( floor ( age   / 5 )) 
 if index > 20 [set index 20]
 if index < 0  [set index 0]
 
-let p.die item index prob-die-imitation
+let p.die item (index) prob-die-imitation
 report p.die 
 
 ;let mortality item index mortality-rate 
@@ -684,7 +695,7 @@ set age.at.death.list lput age age.at.death.list
 end
 
 to replace  
-    set age 0 
+    set age 0
     set rule? false
     set behavior? false
     set my.rule (random 4) + 1 
@@ -1429,13 +1440,13 @@ to my-update-plots
 
   set-current-plot "Age Plot"
   set-current-plot-pen "maxi"
-  ifelse maxi > 0 [plot mean [age] of turtles with [ my.rule  = 1 and age > 15]][plot 0]
+  ifelse maxi > 0 [plot mean [age] of turtles with [ my.rule  = 1 ]][plot 0]
   set-current-plot-pen "mini"
-  ifelse mini > 0 [plot mean [age] of turtles with [ my.rule  = 2 and age > 15]][plot 0]
+  ifelse mini > 0 [plot mean [age] of turtles with [ my.rule  = 2 ]][plot 0]
   set-current-plot-pen "conf"
-  ifelse conf > 0 [plot mean [age] of turtles with [ my.rule  = 3 and age > 15]][plot 0]
+  ifelse conf > 0 [plot mean [age] of turtles with [ my.rule  = 3 ]][plot 0]
   set-current-plot-pen "anti"
-  ifelse anti > 0 [plot mean [age] of turtles with [ my.rule  = 4 and age > 15]][plot 0]
+  ifelse anti > 0 [plot mean [age] of turtles with [ my.rule  = 4 ]][plot 0]
   set-current-plot-pen "all"
   plot mean [age] of turtles
  
@@ -1775,6 +1786,28 @@ end
 ;end
 ;
 ;
+
+
+;end
+;
+;
+to export-ages-test
+set file.name "Initages.csv"
+;set-current-directory ""
+
+let spacer ","
+let l [age] of turtles
+file-open file.name
+file-print   l 
+file-close
+end
+
+to print-ages
+let l [age] of turtles
+show  l
+end
+
+
 ;to export-data
 ;;;set the directory where the file will be stored
 ;create-new-file ""
@@ -1828,6 +1861,9 @@ to export-prop
 export-plot "Population" "popul.csv" 
 end
   
+to export-ages
+export-plot "Age Plot" "ages.csv" 
+end
 
 ;
 ;to-report sat-perception
@@ -1919,7 +1955,7 @@ SLIDER
 *-strength-of-dilemma
 0
 0.5
-0.33
+0.5
 0.01
 1
 NIL
@@ -1974,7 +2010,7 @@ SLIDER
 *-inicoop
 0
 100
-100
+0
 1
 1
 NIL
@@ -2024,7 +2060,7 @@ CHOOSER
 *-Topology
 *-Topology
 "Random" "Small-World" "Scale-Free" "Lattice"
-3
+1
 
 TEXTBOX
 388
@@ -2055,7 +2091,7 @@ SLIDER
 *-Rewiring-Probability
 0
 1
-0.175
+0.23
 .001
 1
 NIL
@@ -2527,7 +2563,7 @@ SLIDER
 *-cultural-constant
 .001
 20
-20
+1
 .001
 1
 NIL

@@ -16,7 +16,7 @@ between<-centralization.betweenness (g,directed=FALSE)
 degrees<-degree(g)
 degreesNormal<-degree(g,normalized=TRUE)
 NumAgents<-vcount(g)
-eigen<-centralization.evcent (g)
+eigen<-centralization.evcent(g)
 
 run.info<-unlist(strsplit(V(g)$RUN.INFO[1],"*",fixed=TRUE))
 dilemma<-as.numeric(run.info[2])
@@ -167,12 +167,12 @@ authorityMini<-mean(authority[ind2])
 authorityConf<-mean(authority[ind3]) 
 authorityAnti<-mean(authority[ind4]) 
 
-#hub
-hub<-hub.score(g)$vector
-hubMaxi<-mean(hub[ind1]) 
-hubMini<-mean(hub[ind2]) 
-hubConf<-mean(hub[ind3]) 
-hubAnti<-mean(hub[ind4]) 
+#hub for undirected matrices equals the authority score 
+#hub<-hub.score(g)$vector
+#hubMaxi<-mean(hub[ind1]) 
+#hubMini<-mean(hub[ind2]) 
+#hubConf<-mean(hub[ind3]) 
+#hubAnti<-mean(hub[ind4]) 
 
 #Reach2
 Reach2<-reach2(g)
@@ -315,15 +315,15 @@ SDauthorityNNanti<-sd(x[ind4])
 
 #hub neighbors
 #hub<-hub.score(g)$vector
-x<-unlist(lapply(allneighbors,function(x) mean(hub[x])))
-hubNNmaxi<-mean(x[ind1])
-hubNNmini<-mean(x[ind2])
-hubNNconf<-mean(x[ind3])
-hubNNanti<-mean(x[ind4])
-SDhubNNmaxi<-sd(x[ind1])
-SDhubNNmini<-sd(x[ind2])
-SDhubNNconf<-sd(x[ind3])
-SDhubNNanti<-sd(x[ind4])
+#x<-unlist(lapply(allneighbors,function(x) mean(hub[x])))
+#hubNNmaxi<-mean(x[ind1])
+#hubNNmini<-mean(x[ind2])
+#hubNNconf<-mean(x[ind3])
+#hubNNanti<-mean(x[ind4])
+#SDhubNNmaxi<-sd(x[ind1])
+#SDhubNNmini<-sd(x[ind2])
+#SDhubNNconf<-sd(x[ind3])
+#SDhubNNanti<-sd(x[ind4])
 
 
 
@@ -581,6 +581,7 @@ createStats<-function(graphs,graphs2)
     library(igraph)
     g<-read.graph(graphs[i] , format="graphml")
     igraphFunctions(g,graphs2[i])
+
     y<-get.adjacency(g)
     ind1<-which(V(g)$MY.RULE==1)
     ind2<-which(V(g)$MY.RULE==2)
